@@ -1,0 +1,26 @@
+{
+  "name": "useful-skills",
+  "version": "0.1.0",
+  "description": "A collection of useful agent skills.",
+  "author": {
+    "name": "Useful Skills"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Useful Skills",
+    "shortDescription": "A collection of useful agent skills.",
+    "longDescription": "A collection of portable agent skills for Codex, Claude Code, and other skill runtimes.",
+    "developerName": "Useful Skills",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ]
+  }
+}

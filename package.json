@@ -1,0 +1,30 @@
+{
+  "name": "useful-skills",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "marketplace:generate": "bun scripts/generate_marketplace_specs.ts --version package",
+    "marketplace:publish": "bun scripts/publish_marketplace.ts",
+    "release:create": "bun scripts/create_release.ts",
+    "release:check": "bun scripts/verify_release.ts",
+    "install:smoke": "bun scripts/install_smoke.ts",
+    "skills:sync": "bun scripts/sync_skill_references.ts",
+    "skills:sync:check": "bun scripts/sync_skill_references.ts --check",
+    "hooks:install": "lefthook install",
+    "hooks:run": "lefthook run pre-commit --all-files && lefthook run pre-push --all-files",
+    "marketplace:generate:node": "tsx scripts/generate_marketplace_specs.ts --version package",
+    "marketplace:publish:node": "tsx scripts/publish_marketplace.ts",
+    "release:create:node": "tsx scripts/create_release.ts",
+    "release:check:node": "tsx scripts/verify_release.ts",
+    "install:smoke:node": "tsx scripts/install_smoke.ts",
+    "skills:sync:node": "tsx scripts/sync_skill_references.ts",
+    "skills:sync:check:node": "tsx scripts/sync_skill_references.ts --check"
+  },
+  "devDependencies": {
+    "lefthook": "^2.1.9",
+    "tsx": "^4.20.6"
+  }
+}

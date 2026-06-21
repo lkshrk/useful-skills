@@ -1,0 +1,12 @@
+{
+  "name": "useful-skills",
+  "version": "0.1.0",
+  "description": "A collection of useful agent skills.",
+  "skills": [
+    "./skills/loc-change-table",
+    "./skills/mac-disk-reclaim",
+    "./skills/project-tool-allowlist",
+    "./skills/upgrade-deps",
+    "./skills/yabai-skhd-doctor"
+  ]
+}
