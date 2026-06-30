@@ -65,11 +65,29 @@ if [ -f build.gradle ] || [ -f build.gradle.kts ]; then
   section "Gradle updates"; echo "run: gradle dependencyUpdates (needs the ben-manes versions plugin)"
 fi
 
-# GitOps/Flux: image/chart tags aren't in a lockfile — list current refs to check.
+# GitOps/Flux: image/chart tags aren't in a lockfile. For each OCIRepository,
+# extract its url + current ref.tag and (if skopeo present) list the newest
+# upstream tags so candidates are concrete, not a grep dump.
 if grep -rlqE 'kind:\s*(HelmRelease|OCIRepository)' . --include='*.yaml' --include='*.yml' 2>/dev/null; then
-  section "GitOps/Flux image & chart refs (check newer tags with skopeo list-tags)"
-  grep -rhnE 'image:|tag:|chart:|version:' . --include='*.yaml' --include='*.yml' 2>/dev/null \
-    | grep -vE '^\s*#' | sort -u | head -60
+  section "GitOps/Flux OCIRepository charts (current tag vs newest upstream)"
+  while IFS= read -r f; do
+    grep -qE 'kind:\s*OCIRepository' "$f" || continue
+    url=$(grep -oE 'oci://[^ "'"'"']+' "$f" | head -1)
+    tag=$(awk '/^[[:space:]]*ref:/{r=1;next} r&&/[[:space:]]tag:/{gsub(/["'"'"']/,"",$2);print $2;exit}' "$f")
+    [ -n "$url" ] || continue
+    printf '%s\n  file: %s  current: %s\n' "$url" "${f#./}" "${tag:-?}"
+    if have skopeo; then
+      skopeo list-tags "docker://${url#oci://}" 2>/dev/null \
+        | grep -oE '"[^"]+"' | tr -d '"' | grep -vE '^(Tags|Repository)$' \
+        | grep -E '^v?[0-9]' | sort -V | tail -8 | sed 's/^/  tag: /' \
+        || echo "  (skopeo could not list tags)"
+    fi
+  done < <(grep -rlE 'kind:\s*OCIRepository' . --include='*.yaml' --include='*.yml' 2>/dev/null)
+  [ "$(grep -rlE 'kind:\s*OCIRepository' . --include='*.yaml' --include='*.yml' 2>/dev/null | wc -l)" -gt 0 ] || echo "(no OCIRepository found)"
+
+  section "GitOps/Flux container image refs (check newer tags with skopeo list-tags)"
+  grep -rhnE '^\s*image:\s*\S' . --include='*.yaml' --include='*.yml' 2>/dev/null \
+    | grep -vE '^\s*#' | sed -E 's/.*image:\s*//' | tr -d '"'"'"'' | sort -u | head -40
 fi
 
 printf '\n(Review changelogs before bumping. Order: security -> patch -> minor -> major.)\n'

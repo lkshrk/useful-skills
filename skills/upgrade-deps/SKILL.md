@@ -19,10 +19,11 @@ present. A repo may have several; handle each.
 
 ## 2. Discover candidates
 
-Run the bundled one-pass discovery (read-only — only query/list commands):
+Run the bundled one-pass discovery (read-only — only query/list commands).
+The script ships beside this SKILL.md; resolve its path so it runs from any cwd:
 
 ```bash
-bash scripts/discover.sh [folder]
+bash "${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/skills/upgrade-deps}/scripts/discover.sh" [repo-folder]
 ```
 
 It lists open **Renovate/Dependabot PRs**, **security advisories** (`npm audit`,
@@ -44,9 +45,14 @@ name the missing tool. Then:
    simplify this project, so the user can decide whether to adopt them.
 4. Apply the **single** bump (manifest + lockfile together). Respect declared
    version ranges unless the user asks to widen them.
-5. **Validate** (build/typecheck/lint per ecosystem).
-6. **Verify** (tests, or Flux health, or CI green if no local tests).
-7. **Commit** one logical upgrade; push / open a PR per the project's flow.
+5. **Validate** (build/typecheck/lint per ecosystem; GitOps → `flux validate`).
+6. **Verify** (tests, or CI green if no local tests). **GitOps/Flux has no
+   build/test — verify means push → reconcile → health gate, and it is
+   mandatory; see "GitOps / Flux specifics" below. Do not substitute "CI green"
+   or "open a PR" for the health gate.**
+7. **Commit** one logical upgrade. For GitOps/Flux: **one upgrade per push** to
+   the reconciled branch (push is part of step 6, not optional). For other
+   ecosystems: push / open a PR per the project's flow.
 8. On failure: stop, diagnose, fix-forward or ask before skip/revert. Never
    revert unrelated user changes.
 
@@ -73,10 +79,17 @@ branch and treat a green pipeline as the verify gate.
   daemon). Discover candidates from Renovate PRs + `OCIRepository`/`HelmRelease`.
 - For charts bundling **CRDs**, diff old vs new CRDs for removed/renamed fields
   before applying. After a chart bump, diff rendered values to catch renamed keys.
-- **Strictly one upgrade per push** — edit one manifest, validate, commit, push,
-  reconcile Flux, wait for the health gate, then the next. Never push multiple
-  upgrades at once; a failing one must revert cleanly.
+- Honor the repo's task runner / wrapper (e.g. `just`, RTK) for every step —
+  prefer `just flux validate`, `just flux reconcile` over raw flux commands when
+  they exist.
+- **Strictly one upgrade per push** — edit one manifest, `flux validate`, commit,
+  push, reconcile Flux, wait for the health gate, then the next. Never push
+  multiple upgrades at once; a failing one must revert cleanly.
+- After push, reconcile source + the affected Kustomization, then poll status:
+  `flux reconcile source git <name>` → `flux reconcile kustomization <name>` →
+  `flux get kustomizations`, `flux get helmreleases`, `kubectl rollout status`.
 - **Health gate** (verify each, where present): Flux Kustomization Ready;
   HelmRelease Ready; Deployment/StatefulSet/DaemonSet rollout healthy; pods
   Running/Ready; Services have endpoints. Use the merged Kustomization/HelmRelease
-  as the primary signal for non-standard workloads.
+  as the primary signal for non-standard workloads. CI-green or PR-merged is NOT
+  a substitute for the live health gate.
