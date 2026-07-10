@@ -65,29 +65,84 @@ if [ -f build.gradle ] || [ -f build.gradle.kts ]; then
   section "Gradle updates"; echo "run: gradle dependencyUpdates (needs the ben-manes versions plugin)"
 fi
 
-# GitOps/Flux: image/chart tags aren't in a lockfile. For each OCIRepository,
-# extract its url + current ref.tag and (if skopeo present) list the newest
-# upstream tags so candidates are concrete, not a grep dump.
-if grep -rlqE 'kind:\s*(HelmRelease|OCIRepository)' . --include='*.yaml' --include='*.yml' 2>/dev/null; then
-  section "GitOps/Flux OCIRepository charts (current tag vs newest upstream)"
-  while IFS= read -r f; do
-    grep -qE 'kind:\s*OCIRepository' "$f" || continue
-    url=$(grep -oE 'oci://[^ "'"'"']+' "$f" | head -1)
-    tag=$(awk '/^[[:space:]]*ref:/{r=1;next} r&&/[[:space:]]tag:/{gsub(/["'"'"']/,"",$2);print $2;exit}' "$f")
-    [ -n "$url" ] || continue
-    printf '%s\n  file: %s  current: %s\n' "$url" "${f#./}" "${tag:-?}"
-    if have skopeo; then
-      skopeo list-tags "docker://${url#oci://}" 2>/dev/null \
-        | grep -oE '"[^"]+"' | tr -d '"' | grep -vE '^(Tags|Repository)$' \
-        | grep -E '^v?[0-9]' | sort -V | tail -8 | sed 's/^/  tag: /' \
-        || echo "  (skopeo could not list tags)"
-    fi
-  done < <(grep -rlE 'kind:\s*OCIRepository' . --include='*.yaml' --include='*.yml' 2>/dev/null)
-  [ "$(grep -rlE 'kind:\s*OCIRepository' . --include='*.yaml' --include='*.yml' 2>/dev/null | wc -l)" -gt 0 ] || echo "(no OCIRepository found)"
+# GitOps/Flux: image/chart tags aren't in a lockfile. Enumerate every Flux
+# source class: OCIRepository refs, HelmRepository-backed HelmRelease chart
+# versions, plain image refs, and renovate-annotated repository/tag pins.
+# yq (v4) parses multi-doc YAML reliably; without it a grep/awk fallback
+# covers OCIRepository only — the output says so.
+if grep -rlqE 'kind:\s*(HelmRelease|OCIRepository|HelmRepository)' . --include='*.yaml' --include='*.yml' 2>/dev/null; then
+  FLUX_FILES=$(grep -rlE 'kind:\s*(HelmRelease|OCIRepository|HelmRepository)' . --include='*.yaml' --include='*.yml' 2>/dev/null)
+
+  list_oci_tags() { # $1 = registry path without oci:// scheme
+    skopeo list-tags "docker://$1" 2>/dev/null \
+      | grep -oE '"[^"]+"' | tr -d '"' | grep -vE '^(Tags|Repository)$' \
+      | grep -E '^v?[0-9]' | sort -V | tail -8
+  }
+
+  section "GitOps/Flux OCIRepository charts (current vs newest upstream)"
+  if have yq; then
+    printf '%s\n' "$FLUX_FILES" | while IFS= read -r f; do
+      yq e 'select(.kind == "OCIRepository") | [.metadata.name, .spec.url // "?", .spec.ref.tag // .spec.ref.semver // .spec.ref.digest // "?"] | @tsv' "$f" 2>/dev/null \
+        | while IFS="$(printf '\t')" read -r name url cur; do
+            [ -n "$name$url" ] || continue
+            printf '%s  %s\n  file: %s  current: %s\n' "$name" "$url" "${f#./}" "$cur"
+            if have skopeo; then
+              list_oci_tags "${url#oci://}" | sed 's/^/  tag: /' || echo "  (skopeo could not list tags)"
+            fi
+          done
+    done
+  else
+    echo "(yq not installed — grep fallback; install yq for reliable multi-doc parsing)"
+    while IFS= read -r f; do
+      grep -qE 'kind:\s*OCIRepository' "$f" || continue
+      url=$(grep -oE 'oci://[^ "'"'"']+' "$f" | head -1)
+      tag=$(awk '/^[[:space:]]*ref:/{r=1;next} r&&/[[:space:]](tag|semver):/{gsub(/["'"'"']/,"",$2);print $2;exit}' "$f")
+      [ -n "$url" ] || continue
+      printf '%s\n  file: %s  current: %s\n' "$url" "${f#./}" "${tag:-?}"
+      have skopeo && { list_oci_tags "${url#oci://}" | sed 's/^/  tag: /' || echo "  (skopeo could not list tags)"; }
+    done < <(printf '%s\n' "$FLUX_FILES")
+  fi
+
+  section "GitOps/Flux HelmRepository-backed charts (current vs repo index; dates support the 48h embargo)"
+  if have yq; then
+    TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+    printf '%s\n' "$FLUX_FILES" | while IFS= read -r f; do
+      yq e 'select(.kind == "HelmRepository") | [.metadata.name, .spec.url // "?", .spec.type // "default"] | @tsv' "$f" 2>/dev/null
+    done | sort -u > "$TMP/repos.tsv"
+    printf '%s\n' "$FLUX_FILES" | while IFS= read -r f; do
+      yq e 'select(.kind == "HelmRelease") | select(.spec.chart.spec.chart != null) | [.metadata.name, .spec.chart.spec.chart, .spec.chart.spec.version // "*", .spec.chart.spec.sourceRef.name // "?"] | @tsv' "$f" 2>/dev/null \
+        | while IFS="$(printf '\t')" read -r rel chart ver src; do
+            [ -n "$chart" ] || continue
+            repo_line=$(awk -F'\t' -v n="$src" '$1==n{print; exit}' "$TMP/repos.tsv")
+            url=$(printf '%s' "$repo_line" | cut -f2)
+            rtype=$(printf '%s' "$repo_line" | cut -f3)
+            printf '%s (chart: %s)\n  file: %s  current: %s  repo: %s\n' "$rel" "$chart" "${f#./}" "$ver" "${url:-sourceRef \"$src\" not found}"
+            [ -n "$url" ] || continue
+            if [ "$rtype" = "oci" ]; then
+              have skopeo && { list_oci_tags "${url#oci://}/$chart" | sed 's/^/  version: /' || echo "  (skopeo could not list versions)"; }
+            elif have curl; then
+              idx="$TMP/$(printf '%s' "$url" | tr -c 'A-Za-z0-9' _).idx"
+              [ -s "$idx" ] || curl -fsSL --max-time 15 "${url%/}/index.yaml" -o "$idx" 2>/dev/null || true
+              if [ -s "$idx" ]; then
+                yq e ".entries[\"$chart\"][] | .version + \"  (\" + ((.created // \"\") | sub(\"T.*\"; \"\")) + \")\"" "$idx" 2>/dev/null \
+                  | head -6 | sed 's/^/  version: /'
+              else
+                echo "  (could not fetch ${url%/}/index.yaml)"
+              fi
+            fi
+          done
+    done
+  else
+    echo "(skipped: yq not installed — HelmRepository-backed chart versions NOT discovered)"
+  fi
 
   section "GitOps/Flux container image refs (check newer tags with skopeo list-tags)"
-  grep -rhnE '^\s*image:\s*\S' . --include='*.yaml' --include='*.yml' 2>/dev/null \
-    | grep -vE '^\s*#' | sed -E 's/.*image:\s*//' | tr -d '"'"'"'' | sort -u | head -40
+  grep -rhE '^\s*image:\s*\S' . --include='*.yaml' --include='*.yml' 2>/dev/null \
+    | grep -vE '^\s*#' | sed -E 's/.*image:\s*//' | tr -d '"'"'" | grep -vE '^[*&{$]' | sort -u
+
+  section "Renovate-annotated pins (repository/tag pairs inside values)"
+  grep -rh -A2 -E '#\s*renovate:' . --include='*.yaml' --include='*.yml' 2>/dev/null \
+    | grep -vE '^--$' | sed -E 's/^\s+//' | head -120
 fi
 
 printf '\n(Review changelogs before bumping. Order: security -> patch -> minor -> major.)\n'

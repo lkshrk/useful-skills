@@ -28,35 +28,57 @@ bash "${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/skills/upgrade-deps}/scripts/discover.
 
 It lists open **Renovate/Dependabot PRs**, **security advisories** (`npm audit`,
 `govulncheck`, `cargo audit`, `pip-audit`, `osv-scanner`), and **outdated deps**
-for every detected ecosystem, plus current Flux image/chart refs. Skipped checks
-name the missing tool. Then:
+for every detected ecosystem. For GitOps/Flux it covers **all four source
+classes**: OCIRepository refs, HelmRepository-backed HelmRelease chart versions
+(with newest index versions + dates), plain `image:` refs, and
+renovate-annotated `repository:`/`tag:` pins. Skipped checks name the missing
+tool. Then:
 
+- **Completeness check (GitOps)**: every `HelmRelease`/`OCIRepository` in the
+  repo must appear in the discovery output. A whole class missing usually means
+  `yq` is absent — install it and rerun rather than proceeding with a partial
+  list.
 - Close abandoned/superseded Renovate PRs (`gh pr close`, note why).
 - Order: security → patch → minor → major. **Major always last.**
 
 ## 3. Upgrade cycle (repeat per dependency)
 
 1. Read the upstream **changelog/release notes**; keep the link.
-2. **Ask before** any major bump, or any upgrade whose notes mention breaking
-   changes, deprecations, migrations, removed config, or CRD/value changes —
-   print a concise summary + the link, then ask update-or-skip. No breaking
-   changes → proceed without asking.
-3. **Highlight new features**: note new capabilities/config that could benefit or
+2. **48-hour embargo**: check the target version's publish date — released less
+   than 48 h ago → do not take it. Fall back to the newest version older than
+   48 h, or defer the dependency and say so in the summary. Date sources:
+   `gh release view <tag> -R <owner>/<repo> --json publishedAt`,
+   `npm view <pkg> time`, chart `index.yaml` `created` (printed by discovery),
+   `skopeo inspect --format '{{.Created}}' docker://<image>:<tag>`.
+3. **Check open issues** on the upstream repo for the target version:
+   `gh issue list -R <owner>/<repo> --state open --search "<version>"` (or
+   `gh search issues`). Open regression/breakage/upgrade-path reports about
+   that version count as doubt.
+4. **Ask before majors — and whenever in doubt.** Always ask before a major
+   bump, or when notes mention breaking changes, deprecations, migrations,
+   removed config, or CRD/value changes. Also ask whenever criticality is
+   unclear: no changelog found, ambiguous notes, open-issue reports from
+   step 3, or a multi-version jump. Asking = print a concise summary
+   (dependency, old → new, changelog link, open-issue findings, your risk
+   read) then offer update / skip / defer. Proceed without asking only when
+   the notes are clear and clean.
+5. **Highlight new features**: note new capabilities/config that could benefit or
    simplify this project, so the user can decide whether to adopt them.
-4. Apply the **single** bump (manifest + lockfile together). Respect declared
+6. Apply the **single** bump (manifest + lockfile together). Respect declared
    version ranges unless the user asks to widen them.
-5. **Validate** (build/typecheck/lint per ecosystem; GitOps → `flux validate`).
-6. **Verify** (tests, or CI green if no local tests). **GitOps/Flux has no
+7. **Validate** (build/typecheck/lint per ecosystem; GitOps → `flux validate`).
+8. **Verify** (tests, or CI green if no local tests). **GitOps/Flux has no
    build/test — verify means push → reconcile → health gate, and it is
    mandatory; see "GitOps / Flux specifics" below. Do not substitute "CI green"
    or "open a PR" for the health gate.**
-7. **Commit** one logical upgrade. For GitOps/Flux: **one upgrade per push** to
-   the reconciled branch (push is part of step 6, not optional). For other
+9. **Commit** one logical upgrade. For GitOps/Flux: **one upgrade per push** to
+   the reconciled branch (push is part of step 8, not optional). For other
    ecosystems: push / open a PR per the project's flow.
-8. On failure: stop, diagnose, fix-forward or ask before skip/revert. Never
-   revert unrelated user changes.
+10. On failure: stop, diagnose, fix-forward or ask before skip/revert. Never
+    revert unrelated user changes.
 
-Keep output concise per item: `dependency  old -> new  changelog-decision  verify-result`.
+Keep output concise per item:
+`dependency  old -> new  changelog-decision  issues-check  verify-result`.
 
 ## Per-ecosystem commands
 
