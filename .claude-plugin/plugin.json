@@ -3,6 +3,8 @@
   "version": "0.3.0",
   "description": "A collection of useful agent skills.",
   "skills": [
+    "./skills/ai-context-generator",
+    "./skills/litho-document-skill",
     "./skills/loc-change-table",
     "./skills/mac-disk-reclaim",
     "./skills/project-tool-allowlist",
