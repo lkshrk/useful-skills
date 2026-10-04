@@ -9,6 +9,9 @@ When available, `wow-account-setup`'s importer supplies scoped Collector/ATT obs
 | Field | Meaning |
 | --- | --- |
 | `schema_version` | `1` |
+| `game` | Dataset edition: renderer supports `retail` or `classic-progression` with the expansion below |
+| `environment` | `live`; beta/PTR datasets are not supported by this renderer |
+| `expansion` | Expansion slug metadata; `classic-progression` currently requires `mists-of-pandaria` |
 | `is_demo` | `true` for synthetic examples; renders a prominent demo notice |
 | `account` | Account alias, or null before import |
 | `snapshot_date` | Observation date string, or null; download time alone is not observation time |
@@ -23,9 +26,13 @@ When available, `wow-account-setup`'s importer supplies scoped Collector/ATT obs
 
 Paths use forward slashes, may contain spaces, and must not be absolute or traverse outside the vault. Do not put credentials in data or notes.
 
+New datasets must include all three context fields at the root, for example `"game": "classic-progression", "environment": "live", "expansion": "mists-of-pandaria"`. Each dataset, its canonical task notes and its account AP evidence belong to exactly one game/environment/expansion and account profile. Store different profiles under separate vault roots; do not merge their IDs, checkboxes, inventory, characters or AP, even if names or numeric IDs match. Root context is authoritative: per-row fields cannot switch databases. If the version is unclear, ask before creating or refreshing the dataset.
+
+For compatibility, schema-version-1 datasets omitting **all three** context fields are treated as Retail live only. They cannot import Classic links implicitly. Partial/unsupported contexts fail validation with a plain-Markdown fallback message. Classic Era, Hardcore, Season of Discovery, Anniversary and Forever are unsupported by this achievement renderer, as are unverified progression expansions and beta/PTR environments. Use scoped plain Markdown goals for those contexts; do not invent achievements, AP totals or Legacy-to-AP mappings.
+
 Display strings (achievement/item names, instructions, currency labels, availability notes and waypoint labels) may use the user's requested language and Unicode. Preserve observed character/realm identities verbatim, including accents and non-Latin scripts; reuse the same identity in root, task and shopping records. Join imported state by stable IDs/GUIDs, never by translating names. Schema keys, enum tokens, category tags, numeric IDs, block IDs and command/API syntax stay unchanged: `game_state: incomplete` remains `incomplete`, not a translated value. Built-in renderer controls currently remain English.
 
-Wowhead links must use HTTPS on exactly `www.wowhead.com`, the matching entity type and numeric ID. An optional two-lowercase-letter locale segment is accepted, for example `https://www.wowhead.com/de/achievement=7` or `https://www.wowhead.com/fr/item=159`. Slugs, queries and fragments are accepted after the ID. Use a verified localized page when available; otherwise retain the canonical English link and explain the fallback. URL syntax validation does not establish that a locale or page exists.
+Wowhead links must use HTTPS on exactly `www.wowhead.com`, the matching game database, entity type and numeric ID. Retail uses `/achievement=ID` and `/item=ID`; Mists Classic uses `/mop-classic/achievement=ID` and `/mop-classic/item=ID`. An optional two-lowercase-letter locale segment follows the edition path: `https://www.wowhead.com/de/achievement=7`, `https://www.wowhead.com/fr/item=159` or `https://www.wowhead.com/mop-classic/de/achievement=7`. A matching numeric ID in a different database is rejected. Slugs, queries and fragments are accepted after the ID. Use a verified localized page when available; otherwise retain the matching edition's canonical English link and explain the fallback. URL syntax validation does not establish that a locale or page exists.
 
 ## Achievement record
 
@@ -43,6 +50,10 @@ Required: `id` (unique positive achievement ID), `name`, `points`, `game_state` 
 - Optional `queue: execute/research` assigns the current view without relocating the canonical source. Without it, source-path partitioning remains the default.
 - Optional `record_kind: achievement/meta` marks automatic meta rewards. Meta records remain in research/history but are excluded from executable recommendations and purchase allocations; link their verified prerequisites in project notes.
 
+Each record's `link` must target its own `source` plus `#^ach-ID` (the `.md` suffix is optional in the link). Before any checkbox state or shopping allocation is calculated, the model binds indexed tasks to their exact `row.source` path and requires `blockId: ach-ID` plus a first achievement URL matching that ID and the dataset's Wowhead edition. Put the canonical achievement link before any supporting achievement links. Missing links/anchors, wrong editions/IDs, wrong source paths and conflicting duplicate checkbox states fail visibly; an unchecked or cancelled task is subject to the same checks. Nested actions must be explicitly marked as described below.
+
+The shared model call is `manualStates(data, tasks)`; passing unscoped tasks alone is unsupported. Both it and `partition(data, tasks)` validate the same canonical identity evidence. Valid existing Retail notes with matching links/anchors need no migration. For older bare checkbox notes, research and add the matching canonical link/anchor without resetting the checkbox. Source path and edition evidence cannot infer account ownership: retain the separate account/profile roots above and verify provenance before moving notes between them.
+
 Corresponding source task:
 
 ```markdown
@@ -56,7 +67,7 @@ Action/session tasks should live outside `task_sources`. If included as nested a
 
 ## Shopping row
 
-Required: unique `purchase_id`, positive `item_id`, `name`, matching `https://www.wowhead.com/item=ID` URL (or localized form described above), `unit_cost` (nonnegative or null), `currency_label`, `owned_usable` (nonnegative or null), `character` and `allocations`.
+Required: unique `purchase_id`, positive `item_id`, `name`, matching edition's Wowhead item URL (or localized form described above), `unit_cost` (nonnegative or null), `currency_label`, `owned_usable` (nonnegative or null), `character` and `allocations`.
 
 Each allocation is `{achievement_id, quantity}`, pointing to an existing achievement. Allocations are authoritative researched consumption requirements; sum separate consumptions and share stock only when reuse/transfer is established. Avoid allocating the same stock to several purchase rows. A checked/game-complete/cancelled/unknown task contributes no remaining purchase allocation.
 

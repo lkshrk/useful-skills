@@ -5,11 +5,11 @@ description: Recommend World of Warcraft spec setups with talents, stat guidance
 
 # WoW Spec
 
-Give the requested spec advice in a usable, self-contained form. Talent recommendations include a copyable import string and meaningful alternatives. Answer in chat unless the user requests Obsidian or Markdown. Do not create dashboards or full-tree renderers for ordinary questions. Reuse the small internal season reference described below; keep it separate from user-facing guides.
+Give the requested spec advice in a usable, self-contained form across Retail, Classic variants and Forever. Talent recommendations include the edition's verified supported import or calculator representation and meaningful alternatives. Answer in chat unless the user requests Obsidian or Markdown. Do not create dashboards or full-tree renderers for ordinary questions. Reuse the small internal season reference described below only where applicable; keep it separate from user-facing guides.
 
 ## Route the requested sections
 
-For every request, follow [request, client and source languages](shared/wow/language.md).
+For every request, follow [game context and capability boundaries](shared/wow/game-context.md), [existing providers by game version](shared/wow/versioned-sources.md), and [request, client and source languages](shared/wow/language.md). Ask which version the user plays when unclear, including the specific Classic variant; remember it for the character or plan. An expansion named as a content target does not establish the client.
 
 - “Build” or “talents”: talents only, unless the user includes other sections.
 - “Stats”, “gems”, “enchants” or “consumables”: answer those sections without running a talent leaderboard scan unnecessarily.
@@ -20,17 +20,20 @@ For stats, gems, enchants, consumables or refresh requests, read [season-setup.m
 
 ## Resolve the intended content
 
-Reuse established game version, specialization and preferences. Only the spec must be known for a spec-specific recommendation; ask for it if it cannot be resolved from context. Missing content, dungeon, boss, difficulty, key level or leveling range does not by itself require a question.
+The shipped setup baseline and automatic refresh pipeline are Retail-live only. For Classic/Forever, use verified matching provider guides; do not reuse a Retail bundle or promise a full pre-researched baseline. Partition any local records by game, environment, expansion, phase/season and compatible revision as described in the setup reference.
+
+Reuse established game version, specialization and preferences. The game and spec must be known for a spec-specific recommendation; ask for whichever cannot be resolved from context. Resolve live/beta/phase/ruleset when it affects the advice. Missing content, dungeon, boss, difficulty, key level or leveling range does not by itself require a question.
 
 | User request | Scope |
 | --- | --- |
 | “Any build” / “a build for this spec” | Reuse known intended content; otherwise give a clearly labelled general PvE baseline, using broad dungeon/solo suitability. Do not claim it is optimal for raid, leveling and PvP simultaneously. |
-| “Dungeon build” / “M+ build” | All current-season M+ dungeons, with a shared baseline and important situational differences. Do not demand a dungeon name. Respect normal/heroic/leveling dungeon wording rather than treating those as M+. |
+| “Dungeon build” | Relevant ordinary dungeons for the resolved edition/level, with important situational differences. Use established M+ context only when applicable; do not turn an ordinary dungeon request into M+. Do not demand a dungeon name. |
+| “M+ build” | All current-season M+ dungeons only for a verified supporting client; disclose an unsupported mode instead of converting a Classic dungeon request into Retail M+. |
 | “Raid build” | Current raid as a whole, or the named raid. Default difficulty as below; do not demand a boss. |
 | “Leveling build” | Current leveling-specific guidance and point progression for the spec. A level is optional; cover the leveling path if none is supplied. |
 | A named dungeon/boss | That exact content; never replace it silently with a broad pool. |
 
-Resolve the current patch, season and talent-tree version from current sources; do not hardcode them. Clarify an ambiguous content name when needed, not a deliberately broad request. Consider pug versus coordinated group and preferred hero tree when supplied; never infer group coordination from leaderboard placement.
+Resolve the edition's current patch, phase/season and talent-tree version from current sources; do not hardcode them. Clarify an ambiguous content name when needed, not a deliberately broad request. Consider pug versus coordinated group and preferred hero tree where supported; never infer group coordination from leaderboard placement. Use edition-appropriate difficulty names; the Heroic/Normal and key-sampling defaults below apply to Retail, not every edition.
 
 Do not ask for key level or difficulty just to proceed. With no key level, use a general dungeon sample without a key filter and show the actual observed levels; ranked samples need not represent all levels evenly. With no raid difficulty, default to Heroic when available, otherwise Normal; for dungeon data use its provider-listed difficulty. Label the default rather than pretending the user chose it. Do not mix raid difficulties silently.
 
@@ -44,15 +47,18 @@ Generic build advice needs no account refresh. Before claiming the user's actual
 
 Explicit source requests override these defaults:
 
+For Classic/Forever, first use the matching sections of our existing providers: Method, Wowhead, Icy Veins and supported Warcraft Logs/Raider.IO pages. Check the linked versioned-source reference and current provider navigation before assuming coverage. Prefer a verified edition-specific published guide when the bundled aggregation tools cannot support the edition. Keep editorial advice distinct from sampled statistics; do not invent usage, stat weights or simulation results. The aggregation defaults below apply only where the exact edition/content and retrieval path are verified.
+
 | Request | Default |
 | --- | --- |
 | General PvE baseline | Broad relevant build statistics or a current explicitly general-purpose source build |
+| Ordinary dungeons | Current edition-specific dungeon/leveling guide; use an appropriately scoped general guide only with its limits stated |
 | All M+ dungeons / whole raid | Our aggregation across the resolved current season/raid; use a labelled published broad build if data access is unavailable |
 | Specific M+ dungeon or top-X M+ sample | Raider.IO leaderboard/run data, aggregated by us |
 | Specific raid boss or top-X raid sample | Warcraft Logs encounter data, aggregated by us |
-| Leveling / leveling dungeons | Current dedicated leveling guidance, including a reliable import and point order; max-level rankings are not leveling evidence |
+| Leveling / leveling dungeons | Current dedicated leveling guidance and point order, with a verified import where supported or selected-build calculator/point allocation otherwise; max-level rankings are not leveling evidence |
 
-For a named site's build, reproduce that source's actual build and label it editorial, published aggregate, individual example or our own aggregation as appropriate. Keep suggested modifications separate. Do not claim a general source build is dungeon/boss-specific. If the source cannot supply the requested scope or import string, disclose the gap and offer a named fallback rather than silently switching. Comparisons retain separate provenance for each build.
+For a named site's build, reproduce that source's actual build and label it editorial, published aggregate, individual example or our own aggregation as appropriate. Keep suggested modifications separate. Do not claim a general source build is dungeon/boss-specific. If the source cannot supply the requested scope or a usable talent representation, disclose the gap and offer a named fallback rather than silently switching. An unavailable import format alone is not a reason to replace the provider when its sourced point allocation and selected-build calculator satisfy the request. Comparisons retain separate provenance for each build.
 
 Wowhead is a supporting source for mechanics and explanations, or a primary source when explicitly requested. Liquid Armory is an explicit-source option only where its requested talent feature can actually be accessed; do not treat simulations or announced features as a live build API.
 
@@ -66,7 +72,7 @@ Starting references (check current documentation and payloads at use time):
 
 No ready-made top-X talent-consensus endpoint is assumed for Raider.IO or Warcraft Logs. Retrieve eligible records and calculate our own aggregation when using those modes. If API access or required fields fail, report the limitation; never invent sample statistics from a handful of search results. Respect provider limits and stop rather than retrying indefinitely. Keep temporary responses outside user-facing guide folders.
 
-Before using an unverified provider path, read [source-validation.md](references/source-validation.md) for the latest tested limitations. Defaults express the preferred source, not a guarantee that its end-to-end retrieval has passed. Raider.IO consistency can be diagnosed with [check_raiderio_sample.py](scripts/check_raiderio_sample.py); its output is explicitly diagnostic, not a certified historical recommendation.
+Before using an unverified provider path, read [source-validation.md](references/source-validation.md) for the latest tested limitations. Defaults express the preferred source, not a guarantee that its end-to-end retrieval has passed. **Executable boundary:** the bundled WCL sampler, Raider.IO diagnostic and modern talent exporter are Retail-only. Do not run them for Classic/Forever with substituted IDs, URLs or reference strings. A provider's non-Retail section does not establish helper compatibility. Use verified matching public guides/calculators until a compatible retrieval/export path is validated. For Retail, Raider.IO consistency can be diagnosed with [check_raiderio_sample.py](scripts/check_raiderio_sample.py); its output is explicitly diagnostic, not a certified historical recommendation.
 
 For an executable WCL sample, use [wcl_builds.py](scripts/wcl_builds.py): bounded ranking retrieval, unique-character aggregation, exact-fight validation of displayed builds, imports and named talent differences. See [commands and validation scope](references/source-validation.md#end-to-end-workflow). Select the appropriate metric explicitly: logged M+ DPS rankings answer a different question from highest-key leaderboards. WCL bracket IDs are not literal key levels; use actual min/max key filters and verify representative fights. When the default Raider.IO path cannot establish historical talents, a clearly labelled WCL alternative is available; an explicit Raider.IO-only request still requires disclosing the blocker rather than substitution.
 
@@ -100,23 +106,23 @@ Agreement is also insufficient proof of run-time provenance: both responses coul
 
 ## Aggregate complete builds, then explain alternatives
 
-Choose the most common observed complete legal build in the selected sample as the default candidate. Call it most common, not proven optimal. Keep class, specialization and hero selections together for the full-build count; show hero-tree shares and compare variants within each hero tree. Do not assemble a new build by independently choosing the most popular node in each slot.
+Choose the most common observed complete legal build in the selected sample as the default candidate. Call it most common, not proven optimal. Keep all supported talent selections together for the full-build count; where hero trees exist, show their shares and compare variants within each hero tree. Do not invent hero trees for other editions or assemble a new build by independently choosing the most popular node in each slot.
 
 Show n/N and percentages with an explicit denominator and weighting. Complete-build popularity and individual-talent popularity are different measures. A build can lead a fragmented sample without having a majority; say so. Report ties rather than inventing a performance winner.
 
-Highlight meaningful alternatives reaching 20% usage by default, configurable on request. This is a reporting threshold, not evidence of superiority. For within-hero-tree percentages, state that denominator separately from the overall sample. Smaller situational variants may be included when supported and relevant. Only present “A instead of B” as a direct swap when the observed builds verify that relationship; multi-node changes require their own complete alternative and import string. Preserve required path nodes, rank budgets and mutually exclusive choices.
+Highlight meaningful alternatives reaching 20% usage by default, configurable on request. This is a reporting threshold, not evidence of superiority. For within-hero-tree percentages, state that denominator separately from the overall sample. Smaller situational variants may be included when supported and relevant. Only present “A instead of B” as a direct swap when the observed builds verify that relationship; multi-node changes require their own complete alternative with the supported talent representation described below. Preserve required path nodes, rank budgets and mutually exclusive choices.
 
 Explain a dungeon/boss-specific swap only with supporting mechanics evidence. Popularity alone does not establish why players chose it, causal performance gains, or suitability for pugs. Separate sourced explanations from explicit inference. Do not promise damage gains without appropriate evidence.
 
-## Import strings are a required deliverable
+## Provide a usable talent representation
 
-For a talent recommendation, provide the exact source-backed import string for the recommended build and every complete alternative being recommended, each alone in a fenced `text` block with a clear label outside it. Gems/enchants/consumables/stat-only answers need no talent string. Never fabricate, hand-edit or concatenate encoded strings.
+For a talent recommendation, verify the edition's supported format first. Where supported, provide the exact source-backed import string for the recommended build and every complete alternative, each alone in a fenced `text` block with its format and destination labelled outside it. A calculator import is not necessarily an in-game import. Method's Forever calculator exposes Export/Import String; inspect and verify that format rather than claiming all non-Retail imports are unsupported. Never feed it to the Retail codec. If that edition has no verified import format, provide a verified selected-build calculator link and sourced point allocation/progression, clearly stating the import limitation. A generic empty calculator is not a selected build. Gems/enchants/consumables/stat-only answers need no talent string. Never fabricate, hand-edit or concatenate encoded strings.
 
 Prefer the source's export for that exact observed build. If only node selections are available, use an existing verified encoder compatible with the current game/tree version; verify a decode/encode round trip preserves spec, hero tree, nodes and ranks. Do not create a speculative encoder during a routine answer. Where a compatible decoder is available, also check source strings against the selected build. Disclose the validation level; source retrieval is not an in-game import test.
 
 For a WCL CombatantInfo event, [export_wcl_talents.py](scripts/export_wcl_talents.py) adapts current Raidbots tree metadata to a pinned copy of Blizzard's existing Lua exporter/importer, downloaded at runtime. Read [the tested method and limits](references/source-validation.md#verified-export-method) before use. It requires installed Lua 5.3+ and a known current reference string for the same spec; both the logged entry/rank round trip and reference-string round trip must pass. Consume JSON output only on exit zero. Verified on Arms/Slayer and Elemental/Farseer logged builds, a partial tiered-node case, and a Colossus reference string; not every specialization or patch, and not an in-game legality check.
 
-If no reliable string can be obtained, mark the answer incomplete for importing and explain the missing capability. Do not present a tree link or an invented string as satisfying this requirement. Offer a clearly identified source build with a verified export as a fallback, keeping it distinct from the unexportable aggregate candidate.
+If the edition supports importing but no reliable string can be obtained, mark the answer incomplete for importing and explain the missing capability. Do not present a tree link or an invented string as a working import. Offer a clearly identified source build with a verified compatible export as a fallback where available, keeping it distinct from the unexportable aggregate candidate. Where importing is unsupported, a sourced point allocation and verified selected-build link can fulfill talent guidance; disclose the unsupported capability without calling the entire recommendation unusable.
 
 ## Present the result
 
@@ -124,13 +130,13 @@ Keep the recommendation self-contained:
 
 For setup sections, follow the output rules in [season-setup.md](references/season-setup.md). Include only requested sections; a talent-only question should not become a shopping list. The following structure applies to talent recommendations:
 
-1. **Suitable for:** spec, scope (general, all dungeons, whole raid, leveling or exact encounter), optional key range/difficulty or leveling range, patch and any material assumptions.
-2. **Recommended build:** hero tree, observed complete-build share and copyable import string.
-3. **Alternative talents:** a compact table of observed changes, n/N usage and supported situations. Include separate import strings for recommended complete alternatives.
-4. **Evidence and limits:** sources, sample dates/weighting/counts, missing records, small or mixed samples and whether live API aggregation actually ran.
+1. **Suitable for:** game/variant, environment, spec, scope (general, ordinary dungeons, M+, whole raid, leveling or exact encounter), applicable difficulty/level range, phase/patch and material assumptions.
+2. **Recommended build:** source-backed selections, hero tree only where supported, observed complete-build share only for a real sample, and a verified edition-compatible import or selected-build calculator/point allocation as described above.
+3. **Alternative talents:** a compact table of supported changes and situations; n/N usage only from a real sample. Include separate verified imports where supported or selected-build links/point allocations for recommended complete alternatives.
+4. **Evidence and limits:** version-matched sources, verification dates, import destination/validation and any data gaps. For sampled builds, include dates/weighting/counts, small or mixed samples and whether live API aggregation actually ran.
 
 For a named editorial build, omit invented sample counts and give its stated context and update information instead. For an explicit comparison, show each source separately before drawing conclusions.
 
 First-version visualization is the differences table plus an exact linked interactive build where the source supports one. Do not invent a build URL or imply a generic calculator opens the recommended selections. Do not draw a misleading approximate full tree in Markdown. Full-tree SVG rendering is deferred; any future renderer must use verified current node positions and represent exactly the import string, with class/spec/hero trees distinct.
 
-Before sending, check: requested content/source preserved; real sample and denominators disclosed; historical talents used; whole builds retained; import strings sourced and labelled; explanations supported; unavailable data not presented as a completed recommendation.
+Before sending, check: game/environment and requested content/source preserved; real samples and denominators disclosed when sampled; historical talents used for sampled builds; whole builds retained; supported import formats sourced and labelled or calculator/point-allocation limitations stated; explanations supported; unavailable data not presented as verified.

@@ -2,6 +2,8 @@
 
 These are observations, not permanent API contracts. Recheck affected capabilities when access or provider behavior changes. The WCL raid and exact-key M+ workflows now pass end to end for the tested cases below. In-game import, broader spec coverage and Archon access remain open.
 
+**Scope: all executable workflows and live-test results below are Retail-only.** The WCL sampler, Raider.IO diagnostic and Raidbots/Blizzard talent exporter have not been validated for Classic variants or Forever. Do not substitute their IDs, API hosts or talent strings to imply compatibility. For other editions use the existing providers' verified matching guides/calculators; see [versioned sources](../shared/wow/versioned-sources.md). Provider Classic/Forever coverage is distinct from bundled helper support. Verify each calculator's format and import destination: Method's Forever calculator offers Export/Import String, which is not proof of Retail-codec or in-game compatibility.
+
 ## End-to-end workflow
 
 [wcl_builds.py](../scripts/wcl_builds.py) reads credentials from `WCL_CLIENT_ID` / `WCL_CLIENT_SECRET`, or a user-designated `--rbw-entry` / `--rbw-folder` with custom fields `client_id` and `secret_id`. Secrets stay in memory; never put them in CLI arguments. The script prints Markdown by default or structured JSON with `--format json`; it writes no files. Save user-facing output only where requested.

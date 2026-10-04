@@ -5,13 +5,24 @@ function taskId(task) {
   const hit = String(task.blockId || '').match(/^ach-(\d+)$/) || String(task.text || '').match(/achievement=(\d+)/);
   return hit ? Number(hit[1]) : null;
 }
-function manualStates(tasks) {
-  const states = new Map();
+function canonicalTasks(data, tasks) {
+  const rows = new Map(data.tasks.map(row => [row.id, row])), found = new Map();
+  const edition = data.game === 'classic-progression' ? 'mop-classic/' : '';
   for (const task of tasks) {
-    const id = taskId(task);
-    if (id !== null && !states.has(id)) states.set(id, String(task.status || ' '));
+    const id = taskId(task), row = rows.get(id);
+    if (!row) continue;
+    const fail = message => {throw new Error('Canonical task ach-'+id+': '+message);};
+    if (task.path !== row.source) fail('source path must match the dataset row.source');
+    if (task.blockId !== 'ach-'+id) fail('missing or conflicting achievement block ID');
+    const link = (String(task.text || '').match(/https?:\/\/[^\s<>()]+/g) || []).find(url => url.includes('achievement='));
+    if (!wowheadLink(link, 'achievement', id, edition)) fail('achievement link must match the dataset game and block ID');
+    if (found.has(id) && String(found.get(id).status || ' ') !== String(task.status || ' ')) fail('conflicting duplicate checkbox states');
+    found.set(id, task);
   }
-  return states;
+  return found;
+}
+function manualStates(data, tasks) {
+  return new Map(Array.from(canonicalTasks(data, tasks), ([id, task]) => [id, String(task.status || ' ')]));
 }
 function status(row, states) {
   if (row.game_state === 'completed') return 'confirmed';
@@ -55,8 +66,7 @@ function shopping(data, states) {
 }
 
 function partition(data, tasks) {
-  const states = manualStates(tasks), byId = new Map();
-  for (const task of tasks) {const id=taskId(task);if(id!==null&&!byId.has(id))byId.set(id,task);}
+  const states = manualStates(data, tasks), byId = canonicalTasks(data, tasks);
   const groups={execution:[],research:[],availability:[],manual:[],confirmed:[],unknown:[],excluded:[],missing:[]};
   for(const row of data.tasks) {
     const task=byId.get(row.id);
@@ -71,9 +81,9 @@ function partition(data, tasks) {
 }
 
 
-function wowheadLink(value, type, id) {
+function wowheadLink(value, type, id, edition) {
   if(typeof value!=='string'||/[\u0000-\u0020\u007f\\]/.test(value))return false;
-  const entity='/(?:[a-z]{2}/)?'+type+'='+id;
+  const entity='/'+edition+'(?:[a-z]{2}/)?'+type+'='+id;
   if(!new RegExp('^https://www\\.wowhead\\.com'+entity+'(?:[/#?]|$)').test(value))return false;
   try{return new RegExp('^'+entity+'(?:/|$)').test(new URL(value).pathname);}catch{return false;}
 }
@@ -83,6 +93,13 @@ function validate(data) {
   const safePath=p=>typeof p==='string' && p.length>0 && !p.startsWith('/') && !p.includes('\\') && !p.split('/').includes('..') && !/^[a-z]+:/i.test(p);
   const nonnegative=n=>Number.isFinite(n)&&n>=0;
   if(data.schema_version!==1)fail('unsupported schema_version');
+  const hasContext=['game','environment','expansion'].some(k=>Object.hasOwn(data,k));
+  let edition='';
+  if(hasContext){
+    if(data.environment!=='live'||typeof data.expansion!=='string'||!data.expansion.trim())fail('unsupported game context; use plain Markdown goals');
+    if(data.game==='classic-progression'&&data.expansion==='mists-of-pandaria')edition='mop-classic/';
+    else if(data.game!=='retail')fail('unsupported game context; use plain Markdown goals');
+  }
   if(data.account_ap!==null&&!nonnegative(data.account_ap))fail('account_ap must be a nonnegative number or null');
   if(!Array.isArray(data.tasks)||!Array.isArray(data.shopping)||!Array.isArray(data.characters)||!data.characters.every(x=>typeof x==='string'))fail('tasks, shopping and characters must be arrays');
   if(!Array.isArray(data.task_sources)||!data.task_sources.length||!data.task_sources.every(safePath)||new Set(data.task_sources).size!==data.task_sources.length)fail('task_sources must be unique vault-relative paths');
@@ -98,7 +115,8 @@ function validate(data) {
     if(typeof row.name!=='string'||!row.name||!nonnegative(row.points))fail('invalid achievement name or points');
     if(!['completed','incomplete','unknown','unobtainable'].includes(row.game_state))fail('invalid game_state');
     if(!data.task_sources.includes(row.source)||!safePath(row.link))fail('task source/link must be within the vault');
-    if(!wowheadLink(row.wowhead_url,'achievement',row.id))fail('achievement link must match its ID');
+    if(![row.source+'#^ach-'+row.id,row.source.replace(/\.md$/,'')+'#^ach-'+row.id].includes(row.link))fail('task link must match its canonical source and block ID');
+    if(!wowheadLink(row.wowhead_url,'achievement',row.id,edition))fail('achievement link must match its game database and ID');
     if(!Array.isArray(row.categories)||!row.categories.length||!row.categories.every(c=>Object.hasOwn(labels,c)))fail('invalid categories');
     if(!Array.isArray(row.characters)||!row.characters.every(x=>typeof x==='string'))fail('characters must be an array');
     if(!['solo','group','unknown'].includes(row.players)||!['ready','conditional','verify','blocked'].includes(row.readiness))fail('invalid players/readiness');
@@ -109,7 +127,7 @@ function validate(data) {
   for(const item of data.shopping){
     if(typeof item.purchase_id!=='string'||!item.purchase_id||purchases.has(item.purchase_id))fail('purchase_id must be unique');
     purchases.add(item.purchase_id);
-    if(!Number.isInteger(item.item_id)||item.item_id<=0||!wowheadLink(item.wowhead_url,'item',item.item_id))fail('purchase item link must match item_id');
+    if(!Number.isInteger(item.item_id)||item.item_id<=0||!wowheadLink(item.wowhead_url,'item',item.item_id,edition))fail('purchase item link must match its game database and item_id');
     if(typeof item.name!=='string'||typeof item.currency_label!=='string'||typeof item.character!=='string')fail('purchase labels must be strings');
     if(item.unit_cost!==null&&!nonnegative(item.unit_cost))fail('unit_cost must be nonnegative or null');
     if(item.owned_usable!==null&&!nonnegative(item.owned_usable))fail('owned_usable must be nonnegative or null');

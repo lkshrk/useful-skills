@@ -1,11 +1,15 @@
 ---
 name: wow-achievement-plan
-description: Create or update personalized WoW achievement plans, including focused requests such as non-time-gated grindable BfA achievements. Turn expansion, zone, achievement or activity goals into ordered todos across quick wins, purchases, grinds, long-term projects and tasks needing help. Includes realistic durations, eligible characters, Obsidian or plain Markdown, TomTom and Wowhead. Single account only; for two players playing together use wow-duo-world-tour. Not for addon development.
+description: Create or update personalized WoW achievement or progression plans for Retail, Classic variants and Forever. Turn achievement, quest, reputation, profession or item goals into ordered todos with realistic durations, eligible characters, version-specific sources and supported waypoints. Use plain Markdown for goals without native achievement credit. Single account only; for two players playing together use wow-duo-world-tour. Not for addon development.
 ---
 
 # WoW Achievement Plan
 
-Complete the user's selected achievement goal; within that scope optimize account achievement points per hands-on minute and shared travel/setup. Produce the researched dataset and executable checklist, not a proposal to research them.
+Complete the user's selected goal. For a native achievement plan, optimize obtainable account achievement points within that scope and shared travel/setup; other progression goals follow the branch below. Produce the researched checklist, not a proposal to research it.
+
+## Resolve game and goal type first
+
+Follow [game context and supported capabilities](shared/wow/game-context.md), asking the version when unclear, and reuse [versioned sources](shared/wow/versioned-sources.md). For a quest, reputation, profession, item, leveling or Legacy goal without native achievement credit, follow [progression goals](shared/wow/progression-goals.md) instead of the achievement/AP-specific flow below. Deliver that Markdown plan without inventing achievement IDs, AP or missing-scan requirements. Existing source freshness, repeatability, timing and preservation rules still apply.
 
 ## Required data refresh before planning
 Before selecting, ranking, routing or estimating personalized work, refresh the local account data; if the refresh fails or freshness cannot be established, stop and ask the user. Follow [shared/wow/data-refresh.md](shared/wow/data-refresh.md) exactly.

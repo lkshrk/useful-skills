@@ -2,6 +2,8 @@
 
 Use [scripts/import_saved_variables.py](../scripts/import_saved_variables.py) for supplied `WoWthing_Collector.lua` and `AllTheThings.lua` exports. Python 3.9+ and its standard library are sufficient. It does not connect to a game host, use network credentials, execute Lua, modify source saves, or edit Markdown task status.
 
+This adapter has verified **Retail** format fixtures only. It rejects a **declared** Classic/Forever game before any writes; it cannot independently authenticate the client that produced raw saves. Use version-scoped manual observations until a matching adapter and fixtures are verified. A familiar filename or GUID does not establish the game version. The caller must verify the version and environment from trustworthy export/client evidence, or ask the user when unclear, before selecting CLI context flags. PTR/beta context labels isolate observations; they do not establish compatibility with future addon schemas.
+
 ## Run
 
 ```sh
@@ -10,13 +12,17 @@ python3 /path/to/wow-account-setup/scripts/import_saved_variables.py \
   --att /path/to/AllTheThings.lua \
   --account main \
   --region eu \
+  --game retail \
+  --environment live \
   --output /path/to/account-observations.json \
   --report /path/to/account-coverage.md
 ```
 
-Use a stable user-chosen account alias and the actual region. Import another account into a different output. Source filenames/paths are provided by the user/environment, not discovered through machine-specific connection setup.
+Use a stable user-chosen account alias, actual region, explicit `--game retail` and verified `--environment live|ptr|beta`. Import another account, game or environment into a different output. Source filenames/paths are provided by the user/environment, not discovered through machine-specific connection setup.
 
-The same command can refresh an existing output. Only a compatible `wow-account-observations` snapshot for the same account/region is accepted. Existing character records absent from the new export are retained and marked not seen in this import; absence does not mean deletion. Missing fields keep prior observations and dates. Repeated identical data does not duplicate characters or reset user progress.
+The same command can refresh an existing output. Only a compatible `wow-account-observations` snapshot for the same account/region/game/environment is accepted. Identical GUIDs across contexts are unrelated. Existing character records absent from the new export are retained and marked not seen in this import; absence does not mean deletion. Missing fields keep prior observations and dates. Repeated identical data does not duplicate characters or reset user progress.
+
+Existing schema-1 snapshots without game/environment stop with an actionable error. After verifying that **both the existing snapshot and supplied exports are Retail in the selected environment**, rerun with `--adopt-legacy-retail`. This explicitly upgrades schema 1 to schema 2 while preserving retained observations and user notes. The flag cannot override a schema-2 context mismatch, an unknown schema, or another account/region. Never apply it merely because an old file lacks context; if its origin cannot be verified, keep it separate and create a new output.
 
 Outputs must differ from inputs and each other. The JSON is replaced atomically after parsing/validation; input or format errors leave the previous snapshot intact. Existing non-generated Markdown is never overwritten. Snapshot/report writes are individually atomic, not a multi-file transaction; if report writing fails after the JSON succeeds, the CLI explicitly reports that the snapshot was saved. Do not run concurrent importers against one output; the script detects output changes during processing but is not a multi-writer database.
 
@@ -39,7 +45,7 @@ The parser supports saved-variable literal assignments, tables, string/integer k
 
 ## Output contract and freshness
 
-The JSON has `kind: wow-account-observations`, `schema_version: 1`, account/region, import time, source filename/hashes, Collector format version, `characters`, `account_observations`, `coverage` and limitations. Each GUID record has:
+The JSON has `kind: wow-account-observations`, `schema_version: 2`, `game: retail`, `environment: live|ptr|beta`, account/region, import time, source filename/hashes, Collector format version, `characters`, `account_observations`, `coverage` and limitations. The context applies to every character and account observation, and appears prominently in the report. Each GUID record has:
 
 - Identity status (`matched`, `unmatched`, `conflicting`), direct identity evidence, and whether identity was present in this import or retained.
 - Last-seen time and `present_in_latest_import`; an ATT-only historical character is not added to the current Collector roster.
@@ -64,5 +70,7 @@ python3 /path/to/wow-account-setup/scripts/check_import.py
 ```
 
 The check uses synthetic fixtures and temporary outputs. It covers safe parsing, exact identity joins, scope separation, real zeros, partial coverage, clock conflicts, repeated/partial imports, preserved user metadata and CLI failure safety. It never reads the originating user's account or environment. Inspect actual source format/coverage when importing a different addon version; passing fixture tests is not evidence of a complete account scan.
+
+Context regressions cover fresh and repeated independent live/PTR/beta snapshots sharing an account/GUID with distinct values; declared unsupported-game rejection without output creation; partial context, unknown schema, invalid environment and malformed nested snapshot rejection without changing JSON, report or inputs; explicit schema-1 adoption into each environment; preserved manual notes; and repeated multilingual imports. Synthetic PTR/beta cases test context isolation, not verified real-client addon compatibility.
 
 Encoding references: [Collector reputations](https://github.com/ThingEngineering/wowthing-collector/blob/main/Modules/Reputations.lua), [currencies](https://github.com/ThingEngineering/wowthing-collector/blob/main/Modules/Currencies.lua), [character achievements](https://github.com/ThingEngineering/wowthing-collector/blob/main/Modules/Achievements.lua), [professions](https://github.com/ThingEngineering/wowthing-collector/blob/main/Modules/Professions.lua), [inventory encoding](https://github.com/ThingEngineering/wowthing-collector/blob/main/Core.lua).

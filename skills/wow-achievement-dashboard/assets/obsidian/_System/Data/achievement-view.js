@@ -10,7 +10,7 @@ const data=m.validate(JSON.parse(raw));
 const pages=data.task_sources.map(path=>dv.page(path));
 if(pages.some(p=>!p)) throw new Error('Source note missing or not yet indexed. Reopen this view after Obsidian indexes the configured task sources.');
 const tasks=pages.flatMap(p=>Array.from(p.file.tasks || []));
-const states = m.manualStates(tasks);
+const states = m.manualStates(data,tasks);
 const missing=m.partition(data,tasks).missing;
 if(missing.length)throw new Error('Canonical source tasks missing or not indexed: '+missing.slice(0,10).map(r=>r.id).join(', '));
 const root = dv.el('div', '', {cls:'wow-achievements'});

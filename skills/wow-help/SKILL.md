@@ -11,7 +11,9 @@ Answer the question so the player can act without opening a website. Sources sup
 
 For every request, follow [request, client and source languages](shared/wow/language.md).
 
-Reuse the established game version, language and character/faction context. If none is established, assume current Retail and state that briefly when it matters. Ask one concise question when Retail versus Classic, an ambiguous item/quest/faction name, faction, or quest phase changes the result. Accept a name, ID, game link or screenshot; resolve the actual entity rather than guessing from a similar name. Do not request a full character profile for a general mechanics question.
+Resolve the version using [game context and supported capabilities](shared/wow/game-context.md). Use the existing providers' matching sections in [versioned sources](shared/wow/versioned-sources.md).
+
+Reuse the established game version, language and character/faction context. If the version is not obvious, ask which version the user plays; do not assume Retail. Ask a targeted question when an ambiguous item/quest/faction name, ruleset or quest phase changes the result. Accept a name, ID, game link or screenshot; resolve the actual entity in that version rather than guessing from a similar name. Do not request a full character profile for a general mechanics question.
 
 Examples in scope: “How do I earn reputation with this faction?”, “Where can I get this item?”, “What is this item used for?”, “How do I finish this quest?” and “Why is this NPC not showing up?” A request to optimize an entire account or create a broad achievement tour belongs to `wow-achievement-plan` when available; do not silently expand a quick question into that workflow.
 
@@ -82,7 +84,7 @@ General questions such as an item's purpose or a faction's reputation methods do
 
 Before making claims or recommendations about **the user's** remaining rep, owned items, completed quests, eligible characters or current unlocks, attempt a refresh from the configured local/game-data reader and persist validated observations. Use the private setup record and current environment documentation to find the reader; do not assume a particular mount/transport. Verify identity, complete input and per-field scan dates, preserving existing progress. Reuse a verified refresh from the same request. `wow-account-setup` can handle gaps when installed; this skill must also work with the environment's existing reader without that companion.
 
-If access/import fails or the needed data is stale, conflicting or missing, ask the user for help/advice before asserting their state or planning from old data. Explain the attempted source and concrete gap; never request passwords in chat or silently substitute checkmarks/public caches. General sourced instructions may still be provided, explicitly without claiming the character is eligible. Use an older snapshot for a personalized answer only if the user explicitly chooses it with its limitations.
+If access/import fails or the needed data is stale, conflicting or missing, ask the user for help/advice before asserting their state or choosing a fallback. Explain the attempted source and concrete gap; never request passwords in chat or silently substitute checkmarks/public caches. General sourced instructions may still be provided without claiming personal eligibility. The user may explicitly choose a specified older snapshot or supply current user-reported state for the answer. Preserve its game/character scope, date, provenance and limits; do not call it an API-confirmed refresh. If that choice is already explicit, use it without asking again or repeatedly requesting an unsupported scan.
 
 ## Save only when requested
 

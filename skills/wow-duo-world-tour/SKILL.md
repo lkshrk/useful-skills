@@ -1,9 +1,13 @@
 ---
 name: wow-duo-world-tour
-description: Create or refresh a joint WoW achievement World Tour for two accounts, prioritizing achievements both need and worthwhile nearby objectives for either player. Produces a dedicated tour in Obsidian or a plain Markdown file, with per-player credit, realistic timing, eligible characters, Wowhead links and copyable TomTom routes.
+description: Create or refresh a joint WoW achievement or progression tour for two players across Retail, Classic variants and Forever. Prioritize shared goals and worthwhile nearby objectives for either player, with compatible game/ruleset/faction, per-player credit, realistic timing, version-specific sources and supported waypoints. Save to Obsidian or plain Markdown.
 ---
 
 # WoW Duo World Tour
+
+## Resolve game and goal type first
+
+Follow [game context and supported capabilities](shared/wow/game-context.md) for each player, asking the version when unclear, and reuse [versioned sources](shared/wow/versioned-sources.md). Verify they can group under the actual ruleset/faction before routing. For non-achievement quest/rep/profession/item/Legacy goals, follow [progression goals](shared/wow/progression-goals.md) instead of the achievement/AP-specific flow below. Keep separate progress and credit, and omit unsupported points and achievement schemas. Retain source freshness, timing and preservation rules.
 
 Plan an enjoyable, executable achievement session for two players. Shared unfinished achievements form the route's backbone; short nearby objectives benefiting only one player are welcome when the detour is worthwhile. Do not restrict the search to the intersection of their incomplete lists, or simply concatenate two solo plans.
 

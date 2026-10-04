@@ -21,6 +21,8 @@ Adapt `Plans/`, `Lists/` and `_System/` to a maintained collection, with user-fa
 
 For every request, follow [request, client and source languages](shared/wow/language.md).
 
+First resolve [game context and supported capabilities](shared/wow/game-context.md); ask which version the user plays when unclear. Preserve game/environment and realm or ruleset with each account's observations. Inspect existing providers' [matching version sections](shared/wow/versioned-sources.md) before considering a new source. Unsupported achievements, storage or APIs are capability limits, not reasons for repeat scans. For non-achievement goals, collect only the relevant quest/rep/profession/item or Legacy state.
+
 Reuse supplied identities and established preferences. Resolve one or two account aliases, region/game version, relevant characters, desired categories, available source locations and output destinations. Ask only for missing information that changes the collection steps; do not ask the user to repeat available facts.
 
 Support any subset of quick wins, buyable, grindable, long-term projects and short tasks needing help. Do not demand inventory scans for a reputation-only project or all alts when only two characters are relevant. Distinguish known characters from a verified complete roster. For duo setup, each account keeps separate identity, access and coverage; use only data the other owner has shared or authorized.
@@ -80,7 +82,7 @@ Do not pretend to log into characters or operate the game. When an in-game actio
 
 ## Normalize and validate
 
-For supplied Collector and ATT files, use the bundled [saved-variable importer](references/saved-variable-import.md) instead of reconstructing a parser or GUID join. It accepts explicit file paths/account/region, produces normalized observations and a coverage report, and safely merges a compatible previous output. No connection setup or network access is built in. Run `python3 scripts/check_import.py` from this skill's directory when validating changes to the importer.
+For supported Retail Collector and ATT files, use the bundled [saved-variable importer](references/saved-variable-import.md) instead of reconstructing a parser or GUID join. It requires explicit file paths/account/region/game/environment, produces normalized observations and a coverage report, and safely merges a compatible previous output. Contextless legacy data needs the reference's explicit adoption procedure after verifying its original context. For Classic/Forever, use a verified compatible existing reader/export; addon availability alone does not establish this importer's compatibility. No connection setup or network access is built in. Run `python3 scripts/check_import.py` from this skill's directory when validating changes to the importer.
 
 Its observation JSON is an input to research, not the dashboard's view JSON. Preserve that boundary: Collector character flags do not prove account incompleteness, and absent AP/prices/timing/eligibility must not be fabricated to fill the UI schema.
 

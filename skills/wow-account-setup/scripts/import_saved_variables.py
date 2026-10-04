@@ -129,9 +129,9 @@ def timestamp(value):
         return None
 
 
-def table(value):
+def table(value, label="value"):
     if not isinstance(value, dict):
-        raise ValueError("Expected a table")
+        raise ValueError(f"Expected a table for {label}")
     return value
 
 
@@ -294,17 +294,46 @@ def identity(guid, char, att, previous):
     return result
 
 
-def import_data(collector, att, account, region, previous=None, sources=None):
+def validate_context(game, environment):
+    if game != "retail":
+        raise ValueError("Unsupported game for this Collector/ATT adapter: only retail has verified fixtures; use manual observations for other versions")
+    if environment not in ("live", "ptr", "beta"):
+        raise ValueError("Environment must be explicitly resolved as live, ptr or beta")
+
+
+def import_data(collector, att, account, region, previous=None, sources=None, *, game, environment, adopt_legacy_retail=False):
+    validate_context(game, environment)
     table(collector); table(att)
     chars = table(collector.get("chars"))
     if any(not isinstance(g, str) or not GUID.fullmatch(g) or not isinstance(c, dict) for g, c in chars.items()):
         raise ValueError("Invalid Collector character table")
-    previous = previous or {}
+    has_previous = previous is not None
+    previous = {} if previous is None else previous
     table(previous)
-    if previous and (previous.get("kind"), previous.get("schema_version"), previous.get("account"), previous.get("region")) != (KIND, 1, account, region):
-        raise ValueError("Existing output is not the same account/region observation snapshot")
+    if has_previous:
+        if (previous.get("kind"), previous.get("account"), previous.get("region")) != (KIND, account, region):
+            raise ValueError("Existing output is not the same account/region observation snapshot")
+        legacy = previous.get("schema_version") == 1 and "game" not in previous and "environment" not in previous
+        if legacy:
+            if not adopt_legacy_retail:
+                raise ValueError("Legacy snapshot has no game/environment; verify it is Retail in the selected environment and pass --adopt-legacy-retail")
+        elif (previous.get("schema_version"), previous.get("game"), previous.get("environment")) != (2, game, environment):
+            raise ValueError("Existing output has an incompatible schema or game/environment; use a separate output for each context")
+        # Validate imported containers before merging, including retained characters.
+        groups = [("account_observations", table(previous.get("account_observations", {}), "existing account_observations"))]
+        for guid, char in table(previous.get("characters", {}), "existing characters").items():
+            path = f"existing characters.{guid}"
+            if not isinstance(guid, str) or not GUID.fullmatch(guid):
+                raise ValueError("Invalid existing character GUID")
+            table(char, path)
+            table(char.get("identity"), path + ".identity")
+            groups.append((path + ".observations", table(char.get("observations", {}), path + ".observations")))
+        for path, observations in groups:
+            for name, field in observations.items():
+                table(field, f"{path}.{name}")
+                table(field.get("scan_times", {}), f"{path}.{name}.scan_times")
     result = copy.deepcopy(previous)
-    result.update(kind=KIND, schema_version=1, account=account, region=region, imported_at=dt.datetime.now(dt.timezone.utc).isoformat(),
+    result.update(kind=KIND, schema_version=2, game=game, environment=environment, account=account, region=region, imported_at=dt.datetime.now(dt.timezone.utc).isoformat(),
                   collector_format_version=collector.get("version"), sources=sources or [], account_ap=None,
                   limitations=["Partial addon observations, not a complete account roster or achievement catalog.",
                                "Collector achievement flags are character-specific; no account AP is inferred.",
@@ -367,7 +396,7 @@ def coverage(data):
 def report(data):
     def escape(value):
         return str(value).replace("|", "\\|").replace("\n", " ").replace("\r", " ").replace("<", "&lt;").replace(">", "&gt;")
-    lines = ["# WoW account import", "", f"Account: **{escape(data['account'])}** ({data['region']}). Import: {data['imported_at']}", "",
+    lines = ["# WoW account import", "", f"Game: **{escape(data['game'])} / {escape(data['environment'])}**", "", f"Account: **{escape(data['account'])}** ({data['region']}). Import: {data['imported_at']}", "",
              "This is partial source coverage, not researched achievement readiness. Account AP remains unknown; source task notes are never edited.", "",
              "| Character / GUID | Identity | Seen in this import | Last seen | Reputation | Professions | Currencies | Inventory | Character achievements |",
              "|---|---|---|---|---|---|---|---|---|"]
@@ -411,9 +440,13 @@ def main():
     parser.add_argument("--att", required=True, type=Path)
     parser.add_argument("--account", required=True, help="Stable user-chosen alias; used to prevent cross-account merges")
     parser.add_argument("--region", required=True, choices=["eu", "us", "kr", "tw", "cn"])
+    parser.add_argument("--game", required=True, help="Resolved game version; this verified adapter supports retail only")
+    parser.add_argument("--environment", required=True, choices=["live", "ptr", "beta"], help="Verified source client environment, never inferred from GUID or filenames")
+    parser.add_argument("--adopt-legacy-retail", action="store_true", help="Confirm the existing schema-1 snapshot was verified as Retail in the selected environment")
     parser.add_argument("--output", required=True, type=Path, help="Observation JSON; existing compatible output is merged")
     parser.add_argument("--report", type=Path, help="Optional generated coverage Markdown")
     args = parser.parse_args()
+    validate_context(args.game, args.environment)
     inputs = {args.collector.resolve(), args.att.resolve()}
     outputs = [args.output.resolve()] + ([args.report.resolve()] if args.report else [])
     if len(set(outputs)) != len(outputs) or inputs.intersection(outputs):
@@ -428,7 +461,8 @@ def main():
     existing = json.loads(before_output) if before_output is not None else None
     collector, source_c = read_lua(args.collector)
     att, source_a = read_lua(args.att)
-    result = import_data(table(collector.get("WWTCSaved")), table(att.get("ATTCharacterData")), args.account, args.region, existing, [source_c, source_a])
+    result = import_data(table(collector.get("WWTCSaved")), table(att.get("ATTCharacterData")), args.account, args.region, existing, [source_c, source_a],
+                         game=args.game, environment=args.environment, adopt_legacy_retail=args.adopt_legacy_retail)
     payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
     markdown = report(result)
     if (args.output.read_bytes() if args.output.exists() else None) != before_output:

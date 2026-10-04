@@ -1,11 +1,15 @@
 ---
 name: wow-achievement-dashboard
-description: Create or refresh WoW achievement dashboards and todo views in Obsidian or as dated static Markdown files, with AP forecasts, realistic session budgets and copyable TomTom routes. Use for visualizing or maintaining an achievement plan; does not substitute for researching account state or achievement feasibility.
+description: Create or refresh WoW achievement dashboards and progression todo views in Obsidian or dated static Markdown. Use the supported achievement renderer for Retail or MoP Classic, and Markdown views for other game contexts or quest, reputation, profession, item and Legacy goals. Includes realistic session budgets and supported waypoints; does not replace research of player state or feasibility.
 ---
 
 # WoW Achievement Dashboard
 
 Make the existing achievement plan useful during play: show what to do next, progress already reported, and which routes fit the available session. Save the dashboard in the selected folder, rather than just describing possible charts.
+
+## Resolve game and view support first
+
+Follow [game context and supported capabilities](shared/wow/game-context.md), asking the version when unclear, and reuse [versioned sources](shared/wow/versioned-sources.md). Use the portable achievement renderer only for the explicit contexts supported by [its schema](references/view-data.md). For other contexts or non-achievement goals, create the static view described in [progression goals](shared/wow/progression-goals.md), including inside an Obsidian vault. That branch replaces the AP/model-specific instructions below; do not fabricate achievement records or Legacy AP to fit the renderer. Keep each game/environment/account dataset separate.
 
 ## Required data refresh before planning
 Before selecting, ranking, routing or estimating personalized work, refresh the local account data; if the refresh fails or freshness cannot be established, stop and ask the user. Follow [shared/wow/data-refresh.md](shared/wow/data-refresh.md) exactly.
@@ -84,7 +88,7 @@ Update existing guides in place and clean up only what you generated. Follow [sh
 
 Surface the latest refresh summary and actionable blockers, not just a generic verification flag. Link changed achievements, newly eligible work and unresolved conflicts from the setup/update note. When session logs exist, show planned versus actual time and partial progress for the relevant action without claiming the whole achievement was completed. Session-action checkboxes are a separate record type and must never enter achievement counts or AP totals. A session checklist references canonical achievements; it does not duplicate their completion state.
 
-Distinguish **refresh the dashboard from existing data** from **update the achievement list**. For a list update, attempt the required database refresh first; use `wow-achievement-plan` when available. Otherwise fetch and validate current account/roster observations, persist the validated merge, compare by stable ID, add only verified incomplete candidates within the selected scope, and preserve user notes and manual status. If refresh or freshness validation fails, ask the user for help/advice before generating new recommendations or using a stale fallback. Without a successful refresh, use existing dated data only for an explicitly presentation-only request or the user's explicit choice of that older snapshot with its limitations; never choose the fallback silently.
+Distinguish **refresh the dashboard from existing data** from **update the achievement list**. For a list update, attempt the required database refresh first; use `wow-achievement-plan` when available. Otherwise fetch and validate current account/roster observations, persist the validated merge, compare by stable ID, add only verified incomplete candidates within the selected scope, and preserve user notes and manual status. If refresh or freshness validation fails, ask the user for help/advice before choosing a fallback. Without a successful refresh, retain dated data for an explicitly presentation-only request, or use the user's explicit choice of an older snapshot or supplied current user-reported state with its limitations. Preserve provenance; user-reported completion does not become confirmed account AP. Do not choose a fallback silently, ask again after an explicit choice, or request an unsupported scan repeatedly.
 
 Newly discovered records without feasibility research belong in an unresearched/conditional queue, excluded from executable forecasts and session recommendations. Incomplete state alone does not establish a working shopping list, grind loop, character eligibility or long-term path; promote them only when that research is available.
 

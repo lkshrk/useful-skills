@@ -10,9 +10,9 @@ Warcraft helper. Ask in plain language — no commands or coding needed.
 | `wow-help` | Quick answers about items, quests, vendors, reputation and game mechanics, with map waypoints. | "Where do I get this mount?" |
 | `wow-spec` | Talent builds (with copyable import strings), stats, gems, enchants and consumables. | "Best Frost Mage build for Mythic+?" |
 | `wow-account-setup` | One-time setup: connects your existing character data so plans fit *your* account. | "Set up my WoW account for achievement planning." |
-| `wow-achievement-plan` | A personal, ordered achievement checklist: quick wins first, realistic times, which character to use. | "Plan the easy BfA achievements I'm still missing." |
-| `wow-achievement-dashboard` | An at-a-glance overview of your plan: what's next, progress and routes for tonight's session. | "Make a dashboard for my achievement plan." |
-| `wow-duo-world-tour` | A shared achievement route for you and a friend, showing who gets credit for what. | "Plan a 2-hour achievement tour for me and my partner." |
+| `wow-achievement-plan` | A personal achievement or progression checklist: quests, reputation, professions and items, with realistic times and eligible characters. | "Plan my TBC Anniversary reputation grind." |
+| `wow-achievement-dashboard` | An overview of your plan: next actions, progress and routes, with static checklists for non-achievement goals. | "Make a dashboard for my achievement plan." |
+| `wow-duo-world-tour` | A shared achievement or progression route for you and a friend, showing who gets credit for what. | "Plan a 2-hour quest and profession tour for us." |
 
 ## Install
 
@@ -51,6 +51,14 @@ npx skills add lkshrk/useful-skills --skill wow-help wow-spec wow-account-setup 
 
 ## Good to know
 
+- **Game versions:** use Retail, a specific Classic variant, or Forever. If the
+  version isn't clear, the assistant asks and remembers it for that character or
+  plan. It uses the matching sections of existing sources such as Wowhead,
+  Method, Raider.IO and Warcraft Logs, and explains any coverage gap.
+- **Current tool coverage:** the bundled player-state importer and automated
+  build/season-refresh helpers remain Retail-specific. The achievement views
+  support Retail and MoP Classic live data. Other contexts and progression goals
+  use ordinary Markdown plans; addon/API compatibility is checked before import.
 - **Output:** plans are saved as simple checklist files you can open anywhere.
   If you use [Obsidian](https://obsidian.md) (a notes app), they can go there instead.
 - **Waypoints:** routes come as commands for the [TomTom](https://www.curseforge.com/wow/addons/tomtom)
