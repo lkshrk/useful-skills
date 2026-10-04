@@ -4,7 +4,7 @@ import path from "node:path";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const SKILLS_DIR = path.join(ROOT, "skills");
-const REF_PREFIXES = ["agents", "docs", "templates", "scripts", "schemas", "examples"];
+const REF_PREFIXES = ["agents", "docs", "templates", "scripts", "schemas", "examples", "shared"];
 const REF_PATTERN = new RegExp(`(?:${REF_PREFIXES.join("|")})/[A-Za-z0-9_./-]+`, "g");
 
 type Drift = { skill: string; file: string; reason: "missing" | "stale" | "orphan" };

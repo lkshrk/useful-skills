@@ -1,0 +1,9 @@
+# Required data refresh before planning
+
+Before selecting, ranking, routing or estimating personalized work, **attempt to update the local account database from the current configured source**. This applies to new plans, replacement lists, next-session recommendations and duo plans; an existing dataset or checklist is not a reason to skip the attempt. Reuse a verified refresh already completed for the same request rather than collecting it twice.
+
+Read the private setup record and current environment documentation to find the working reader/transport. Retrieve complete current exports, validate account identity, source modification times and per-field scan clocks, then merge valid observations into the local database while preserving manual progress and older fields not covered by the import. Read back the saved result and record the refresh outcome/source dates before planning. A successful download of stale cached data is not proof of current state.
+
+**If the refresh fails, required coverage is missing, or freshness cannot be established, stop the dependent planning and ask the user for help/advice.** State the source/reader tried, concrete error or stale/conflicting dates, and the smallest useful question: has the access method changed, where is the current source, or does the game/export need saving or syncing? Do not ask for passwords in chat. Do not silently substitute an old snapshot, public cache, manual checkmarks or a generic plan. Keep the previous database and guide intact. Continue independent source/method investigation while awaiting the answer, but resume personalized planning only after a successful verified refresh or the user's explicit instruction to use a specified older snapshot with its limitations.
+
+Pure formatting, file organization or an explicitly presentation-only dashboard update can retain dated existing data when no new gameplay recommendations are generated; do not describe that as an account refresh.

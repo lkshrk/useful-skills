@@ -16,6 +16,10 @@ on:
         required: false
         default: false
         type: boolean
+      summary:
+        description: "Optional change summary prepended to the release notes."
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -84,8 +88,13 @@ jobs:
         run: make install-smoke
 
       - name: Build release notes
+        env:
+          SUMMARY: ${{ inputs.summary }}
         run: |
-          cat > release-notes.md <<EOF
+          if [ -n "$SUMMARY" ]; then
+            printf '## Changes\n\n%s\n\n' "$SUMMARY" > release-notes.md
+          fi
+          cat >> release-notes.md <<EOF
           ## Install
 
           \`\`\`sh
@@ -136,6 +145,12 @@ jobs:
               --title "useful-skills $TAG" \
               --notes-file release-notes.md
           fi
+
+      - name: Attach per-skill ZIPs for chat app uploads
+        run: |
+          set -euo pipefail
+          make skill-zips
+          gh release upload "$TAG" dist/skills/*.zip --clobber
 
       - name: Bump marketplace useful-skills version
         env:
