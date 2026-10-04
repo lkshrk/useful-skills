@@ -4,24 +4,11 @@ A collection of useful agent skills, packaged as a Codex / Claude Code plugin.
 
 ## Install
 
-The direct install path is the `skills` CLI. It installs the portable `SKILL.md`
-files from this repository into supported agent runtimes.
-
-```sh
-npx skills add lkshrk/useful-skills --agent codex --agent claude-code
-```
-
-List available skills:
-
-```sh
-npx skills add lkshrk/useful-skills --list
-```
-
-Chat apps (ChatGPT, Claude): each release attaches one ZIP per skill to upload
-under Skills; see [docs/wow.md](docs/wow.md#install-in-chatgpt) for a walkthrough.
-
-See [docs/install.md](docs/install.md) for single-skill installs and
-[docs/marketplace.md](docs/marketplace.md) for the plugin marketplace path.
+| Where | How |
+| --- | --- |
+| Claude Code, Codex | `npx skills add lkshrk/useful-skills` ([options](docs/install.md)) |
+| ChatGPT, Claude app | Upload a skill ZIP from the [latest release](https://github.com/lkshrk/useful-skills/releases/latest); WoW skills come as one `wow-skills.zip` ([walkthrough](docs/wow.md#install)) |
+| Plugin marketplace | [docs/marketplace.md](docs/marketplace.md) |
 
 ## Skills
 
@@ -54,7 +41,7 @@ bun test
 
 `make install-smoke` validates manifests, version sync, docs, and workflows.
 `make skills-sync-check` keeps each skill's bundled reference files in sync.
-`make skill-zips` builds the per-skill upload ZIPs into `dist/skills/`.
+`make skill-zips` builds the chat-app upload ZIPs into `dist/skills/` (WoW skills bundled as `wow-skills.zip`).
 
 ## Release
 
@@ -66,8 +53,7 @@ git push origin HEAD --tags
 Pushing a `vX.Y.Z` tag runs CI; on success CI dispatches `release.yml`, which
 creates the GitHub release and bumps the `useful-skills` entry in
 `lkshrk/agent-marketplace` (requires the `MARKETPLACE_PUSH_TOKEN` secret).
+Each release also attaches upload ZIPs for chat apps (`make skill-zips`).
 
-## WoW season refresh
-
-A weekly workflow refreshes the bundled WoW spec data. Setup and details:
-[docs/wow-season-updates.md](docs/wow-season-updates.md).
+Patch releases are also cut automatically when the weekly WoW season refresh
+updates the `wow-spec` data (`.github/workflows/wow-season-updates.yml`).

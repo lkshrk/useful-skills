@@ -1,6 +1,6 @@
 # World of Warcraft skills
 
-A set of skills that turn your AI assistant (Claude or Codex) into a World of
+A set of skills that turn your AI assistant (ChatGPT, Claude or Codex) into a World of
 Warcraft helper. Ask in plain language — no commands or coding needed.
 
 ## What you can ask
@@ -14,27 +14,28 @@ Warcraft helper. Ask in plain language — no commands or coding needed.
 | `wow-achievement-dashboard` | An at-a-glance overview of your plan: what's next, progress and routes for tonight's session. | "Make a dashboard for my achievement plan." |
 | `wow-duo-world-tour` | A shared achievement route for you and a friend, showing who gets credit for what. | "Plan a 2-hour achievement tour for me and my partner." |
 
-## Install in ChatGPT
+## Install
 
-1. Download the skills you want (one file each, don't unzip):
-   - [wow-help.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-help.zip)
-   - [wow-spec.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-spec.zip)
-   - [wow-account-setup.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-account-setup.zip)
-   - [wow-achievement-plan.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-achievement-plan.zip)
-   - [wow-achievement-dashboard.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-achievement-dashboard.zip)
-   - [wow-duo-world-tour.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-duo-world-tour.zip)
-2. In ChatGPT, open **Plugins** in the sidebar, then the **Skills** tab.
-3. Click **Create** → **Upload from your computer** and pick a downloaded file.
-   Repeat for each skill.
-4. Start a new chat and ask away — ChatGPT picks the right skill by itself.
+Download [wow-skills.zip](https://github.com/lkshrk/useful-skills/releases/latest/download/wow-skills.zip)
+and double-click it. You get a folder with one file per skill. Don't unzip those.
 
-The web and desktop apps keep separate skill lists, so upload in each app you use.
-To update, download the files again and re-upload them.
+### ChatGPT
 
-**Claude app instead?** Turn on **Settings → Capabilities → Code execution and
-file creation**, then upload the same files under **Skills → Upload skill**.
+1. Open **Plugins** in the sidebar, then the **Skills** tab.
+2. Click **Create** → **Upload from your computer** and pick a file from the folder.
+   Repeat for each skill you want.
+3. Start a new chat and ask away. ChatGPT picks the right skill by itself.
 
-**Claude Code or Codex?** One command installs all six:
+Web and desktop app keep separate skill lists, so upload in each one you use.
+To update, download and upload again.
+
+### Claude app
+
+1. Open **Customize → Skills**.
+2. Click **+** → **Create skill** → **Upload a skill** and pick a file from the folder.
+   Repeat for each skill you want.
+
+### Claude Code, Codex
 
 ```sh
 npx skills add lkshrk/useful-skills --skill wow-help wow-spec wow-account-setup wow-achievement-plan wow-achievement-dashboard wow-duo-world-tour

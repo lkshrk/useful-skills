@@ -27,3 +27,5 @@ skills-sync-check:
 skill-zips:
 	rm -rf dist/skills && mkdir -p dist/skills
 	cd skills && for dir in */; do name=$${dir%/}; zip -qr "../dist/skills/$$name.zip" "$$name" -x '*/tests/*' '*/__pycache__/*' '*/test_*.py' '*.DS_Store'; done
+	mkdir -p dist/skills/wow-skills && mv dist/skills/wow-*.zip dist/skills/wow-skills/
+	cd dist/skills && zip -qr wow-skills.zip wow-skills && rm -rf wow-skills
