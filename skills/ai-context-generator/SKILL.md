@@ -1,7 +1,6 @@
 ---
 name: ai-context-generator
-description: |
-  Generates .ai-context knowledge base for coding agents. Activate when: (1) setting up a new project for AI-assisted development, (2) user asks to "create project knowledge" or "setup ai-context", (3) existing .ai-context needs regeneration. Creates tiered documentation structure optimized for agent comprehension and token efficiency.
+description: 'Generates .ai-context knowledge base for coding agents. Activate when: (1) setting up a new project for AI-assisted development, (2) user asks to "create project knowledge" or "setup ai-context", (3) existing .ai-context needs regeneration. Creates tiered documentation structure optimized for agent comprehension and token efficiency.'
 ---
 
 # AI Context Generator
