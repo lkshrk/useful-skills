@@ -4,6 +4,22 @@ const skill=path.resolve(__dirname,'..'),assets=path.join(skill,'assets/obsidian
 const m=require(path.join(assets,'_System/Data/achievement-model.cjs'));
 const fixture=fs.readFileSync(path.join(skill,'tests/fixtures/account.json'),'utf8');
 {
+ const data=JSON.parse(fixture.replaceAll('{{ROOT}}','WoW'));
+ for(const [field,type,idField] of [['tasks','achievement','id'],['shopping','item','item_id']]){
+  const row=data[field][0],id=row[idField],base='https://www.wowhead.com/';
+  for(const prefix of ['', 'de/', 'fr/', 'ko/']){
+   for(const suffix of ['', '/märchen', '?foo=bar', '#comments', '/名字?foo=bar#comments']){
+    row.wowhead_url=base+prefix+type+'='+id+suffix;
+    assert.doesNotThrow(()=>m.validate(data),row.wowhead_url);
+   }
+  }
+  for(const url of [base+'de/'+type+'='+id+'0',base+'de/'+type+'='+(id+1),base+'de/'+(type==='item'?'achievement':'item')+'='+id,base+'DE/'+type+'='+id,base+'de/../'+type+'='+id,base+type+'='+id+'/../../item=999',base+type+'='+id+'\n',base+type+'='+id+'/\\evil',base.replace('https:','http:')+type+'='+id,'https://www.wowhead.com.evil.test/'+type+'='+id,'https://www.wowhead.com@evil.test/'+type+'='+id,'javascript:alert(1)']){
+   row.wowhead_url=url;assert.throws(()=>m.validate(data),url);
+  }
+  row.wowhead_url=base+type+'='+id;
+ }
+}
+{
  const rows=[{id:1,game_state:'incomplete',source:'research',queue:'execute'},{id:2,game_state:'incomplete',source:'execute',record_kind:'meta'},{id:3,game_state:'incomplete',source:'execute',queue:'research'}];
  const tasks=rows.map(r=>({blockId:'ach-'+r.id,status:' '}));
  const groups=m.partition({tasks:rows,research_source:'research'},tasks);
@@ -63,10 +79,16 @@ async function render(vault,folder,note){
  await new AsyncFunction('dv',code)(context.dv);
  return context;
 }
-async function exercise(folder){
+async function exercise(folder,localized=false){
  const vault=fs.mkdtempSync(path.join(os.tmpdir(),'wow-template-'));
  try{
   const data=JSON.parse(fixture.replaceAll('{{ROOT}}',folder));
+  if(localized){
+   const identities=new Map(data.characters.map((name,i)=>[name,['Mära-Die Aldor','星光-银月'][i]]));
+   data.characters=data.characters.map(name=>identities.get(name));
+   for(const row of data.tasks){row.name='Erfolg 星光 '+row.id;row.characters=row.characters.map(name=>identities.get(name));row.wowhead_url='https://www.wowhead.com/de/achievement='+row.id;}
+   for(const item of data.shopping){item.name='Étoffe 魔法';item.currency_label='金幣';item.character=identities.get(item.character)||item.character;item.wowhead_url='https://www.wowhead.com/fr/item='+item.item_id;}
+  }
   const taskText=source=>data.tasks.filter(t=>t.source===source).map(t=>
    '- ['+(t.game_state==='completed'||data.example_manual_ids.includes(t.id)?'x':' ')+'] ['+t.name+']('+t.wowhead_url+') ^ach-'+t.id).join('\n');
   const replacements={ROOT:folder,EXECUTION_TASKS:taskText(data.task_sources[0]),RESEARCH_TASKS:taskText(data.task_sources[1]),IMPORTED_TASKS:taskText(data.task_sources[2]),COVERAGE_REPORT:'Demo only; no real account was imported.',PLUGIN_READINESS:'Runtime not checked in this temporary vault.',REFRESH_REPORT:'Synthetic first import.',VALIDATION_REPORT:'Automated fixture checks only.',SESSION_PLAN:'Demo session; no gameplay advice.',SESSION_ACTIONS:'- [ ] Demonstration action; excluded from achievement sources. ^action-demo',SESSION_FEEDBACK:'No observed play time.',TOUR_OVERVIEW:'Demo pair only.',TOUR_STOPS:'No real itinerary.',TOMTOM_ROUTE:'No verified waypoints in this demo.',TOUR_EVIDENCE:'Synthetic layout check; not gameplay advice.'};
@@ -123,19 +145,27 @@ async function exercise(folder){
   // Simulate the browser's first-option selection.
   const selects=all(root,'select');for(const s of selects)s.value=s.children[0].value;
   selects[0].events.change();assert.equal(all(root,'tr').length,3);
+  if(localized){
+   assert(textOf(root).includes('Erfolg 星光 7'));assert(textOf(root).includes('Mära-Die Aldor'));
+   const character=selects.find(s=>s.children.some(o=>o.value===data.characters[0]));
+   character.value=data.characters[1];character.events.change();assert.equal(all(root,'tr').length,0);
+   character.value=data.characters[0];character.events.change();assert.equal(all(root,'tr').length,3);
+  }
   selects[0].value='15';selects[0].events.change();assert.equal(all(root,'tr').length,2);
   const shopping=await render(vault,folder,'Lists/Shopping.md');
-  assert(textOf(shopping.roots[0]).includes('7.5 gold'));assert(!textOf(shopping.roots[0]).includes('Derby Marks'));
+  assert(textOf(shopping.roots[0]).includes('7.5 '+data.shopping[0].currency_label));assert(!textOf(shopping.roots[0]).includes('Derby Marks'));
+  if(localized)assert(textOf(shopping.roots[0]).includes('Étoffe 魔法'));
   const unavailable=structuredClone(data);unavailable.account_ap=null;fs.writeFileSync(dataPath,JSON.stringify(unavailable));
   assert(textOf((await render(vault,folder,'Dashboard.md')).roots[0]).includes('Unavailable'));
   const gated=structuredClone(data),active=gated.tasks.find(r=>r.id===8);
-  active.availability=[{expansion_order:1,expansion:'Demo',continent:'Demo',area:'Test area',what:'Required rotation',tomtom:['/way #1 50 50 Demo'],checks:['/run OpenWorldMap(1)'],check_note:'Map inspection, not automatic detection'}];
+  const waypoint=localized?'/way #1 50 50 Entrée 星光':'/way #1 50 50 Demo';
+  active.availability=[{expansion_order:1,expansion:'Demo',continent:'Demo',area:'Test area',what:'Required rotation',tomtom:[waypoint],checks:['/run OpenWorldMap(1)'],check_note:'Map inspection, not automatic detection'}];
   fs.writeFileSync(dataPath,JSON.stringify(gated));m.validate(gated);
   const avail=await render(vault,folder,'Lists/Waiting & Events.md');
   assert.equal(all(avail.roots[0],'tr').length,2);assert.equal(all(avail.roots[0],'button').length,2);
   assert(textOf(avail.roots[0]).includes('Required rotation'));
   const nav=Object.getOwnPropertyDescriptor(global,'navigator');
-  Object.defineProperty(global,'navigator',{configurable:true,value:{clipboard:{writeText:async value=>{assert.equal(value,'/way #1 50 50 Demo');}}}});
+  Object.defineProperty(global,'navigator',{configurable:true,value:{clipboard:{writeText:async value=>{assert.equal(value,waypoint);}}}});
   try{await all(avail.roots[0],'button')[0].events.click();}finally{if(nav)Object.defineProperty(global,'navigator',nav);else delete global.navigator;}
   assert.equal(all(avail.roots[0],'button')[0].textContent,'Copied');
   const empty={...data,is_demo:false,account_ap:null,tasks:[],shopping:[],characters:[]};fs.writeFileSync(dataPath,JSON.stringify(empty));
@@ -148,5 +178,6 @@ async function exercise(folder){
 }
 (async()=>{
  for(const folder of ['WoW','Collection Lab','Games/Alternative'])await exercise(folder);
+ await exercise('Spiele/Erfolge 星光',true);
  console.log('No personal vault or account was used. DOM checks do not replace an Obsidian runtime/visual check.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

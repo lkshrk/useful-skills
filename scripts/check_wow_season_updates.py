@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Read-only public-source drift check; never updates WoW recommendations or credentials."""
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 import hashlib
 from html.parser import HTMLParser
@@ -10,6 +11,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,10 +139,26 @@ def observe(pair):
 
 def capture(bundle):
     wanted = targets(bundle)
+    started = time.monotonic()
+    total = len(wanted)
+    print(f'Source detection started: fetching {total} public sources with 4 workers; '
+          '20s timeout per source.', file=sys.stderr, flush=True)
+    sources = {}
+    unavailable = 0
+    interval = max(1, (total + 9) // 10)
     with ThreadPoolExecutor(max_workers=4) as pool:
-        sources = dict(pool.map(observe, wanted.items()))
+        for future in as_completed([pool.submit(observe, pair) for pair in wanted.items()]):
+            url, value = future.result()
+            sources[url] = value
+            unavailable += bool(value.get('error'))
+            done = len(sources)
+            if done % interval == 0 or done == total:
+                print(f'Source collection: {done}/{total} completed; {done - unavailable} fingerprinted; '
+                      f'{unavailable} unavailable; {time.monotonic() - started:.1f}s elapsed.',
+                      file=sys.stderr, flush=True)
     return {'schema_version': 1, 'captured_at': datetime.now(timezone.utc).isoformat(),
-            'season': json.loads((bundle / 'index.json').read_text())['season'], 'sources': sources}
+            'season': json.loads((bundle / 'index.json').read_text())['season'],
+            'sources': {url: sources[url] for url in wanted}}
 
 
 def compare(baseline, current):
@@ -164,11 +182,36 @@ def compare(baseline, current):
     return rows
 
 
-def report(rows, current):
+def report(rows, current, force_refresh=False):
     changed = [r for r in rows if r['status'] != 'unchanged']
+    counts = Counter(r['status'] for r in rows)
+    known = sum(bool(r.get('known_unavailable')) for r in rows)
+    required = exit_status(rows) != 0
+    reasons = []
+    for status, label in [('changed', 'changed fingerprints'), ('baseline-needed', 'sources needing a baseline'),
+                          ('no-longer-referenced', 'removed source references')]:
+        if counts[status]:
+            reasons.append(f'{counts[status]} {label}')
+    if counts['unavailable'] > known:
+        reasons.append(f'{counts["unavailable"] - known} newly unavailable sources')
+    if rows and counts['unavailable'] == len(rows):
+        reasons.append('all sources unavailable; no successful source checks')
+    if force_refresh:
+        reasons.append('force_refresh=true requests a recommendation recheck')
+    if not reasons:
+        reasons.append('no actionable source drift detected; known monitoring gaps alone do not trigger refresh')
     lines = ['# WoW seasonal source check', '',
              f'Season: {current["season"]} · Checked: {current["captured_at"]}', '',
-             f'{len(rows) - len(changed)} unchanged sources; {len(changed)} require attention.', '',
+             '**Source detection ran:** public-source collection and fingerprint comparison completed.', '',
+             f'{counts["unchanged"]} unchanged; {counts["changed"]} changed; '
+             f'{counts["baseline-needed"]} baseline needed; {counts["no-longer-referenced"]} removed; '
+             f'{counts["unavailable"] - known} newly unavailable; {known} known monitoring gaps.', '',
+             f'**Recommendation refresh gate: {"RUN" if required or force_refresh else "SKIP"}** — '
+             + '; '.join(reasons) + '.',
+             f'`requires_refresh={str(required).lower()}` · `force_refresh={str(force_refresh).lower()}`', '',
+             'RUN authorizes the downstream refresh; it does not mean Codex or publication has completed.',
+             'Manual dispatch alone does not force a refresh. Enable **Recheck recommendations even when source '
+             'fingerprints are unchanged** (`force_refresh`) to request that recheck.', '',
              'This detects source drift, not whether a recommendation is now wrong. Verified setup files were not modified.', '']
     if changed:
         lines += ['| Status | Source | Affected specs | Detail |', '| --- | --- | --- | --- |']
@@ -176,7 +219,7 @@ def report(rows, current):
             affected = ', '.join(str(i) for i in row['spec_ids']) or 'All / season metadata'
             detail = row.get('error', 'Review before refreshing the bundled baseline').replace('|', '/')
             if row.get('known_unavailable'):
-                detail += ' (known monitoring gap; not checked)'
+                detail += ' (known monitoring gap; retrieval attempted, content could not be checked)'
             lines.append(f'| {row["status"]} | {row["url"]} | {affected} | {detail} |')
     else:
         lines += ['No source changes detected. This does not replace checking unmonitored hotfix announcements.']
@@ -199,6 +242,8 @@ def main():
     args = parser.parse_args()
     path = args.bundle / 'source-watch.json'
     baseline = json.loads(path.read_text()) if path.exists() else {'sources': {}}
+    print(f'Baseline: {path}; {len(baseline.get("sources", {}))} saved sources; '
+          f'captured at {baseline.get("captured_at", "unknown / no baseline")}.', file=sys.stderr, flush=True)
     current = capture(args.bundle)
     if args.snapshot:
         for url, value in current['sources'].items():
@@ -207,8 +252,12 @@ def main():
                 value['sha256'] = previous['sha256']
                 value['hash_captured_at'] = previous.get('hash_captured_at', baseline.get('captured_at'))
         print(json.dumps(current, indent=2))
+        print('Candidate snapshot emitted; no baseline accepted and no recommendations updated.', file=sys.stderr)
         return 0  # Failures retain any previous digest; no new digest is invented.
     rows = compare(baseline, current)
+    print(f'Source detection complete: compared {len(rows)} source records; '
+          f'requires_refresh={str(exit_status(rows) != 0).lower()}; source_check_exit={exit_status(rows)}.',
+          file=sys.stderr, flush=True)
     if args.json:
         print(json.dumps({'schema_version': 1, 'current': current, 'rows': rows,
                           'requires_refresh': exit_status(rows) != 0}, indent=2))

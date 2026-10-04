@@ -19,6 +19,8 @@ Adapt `Plans/`, `Lists/` and `_System/` to a maintained collection, with user-fa
 
 ## Resolve scope with minimal questions
 
+For every request, follow [request, client and source languages](shared/wow/language.md).
+
 Reuse supplied identities and established preferences. Resolve one or two account aliases, region/game version, relevant characters, desired categories, available source locations and output destinations. Ask only for missing information that changes the collection steps; do not ask the user to repeat available facts.
 
 Support any subset of quick wins, buyable, grindable, long-term projects and short tasks needing help. Do not demand inventory scans for a reputation-only project or all alts when only two characters are relevant. Distinguish known characters from a verified complete roster. For duo setup, each account keeps separate identity, access and coverage; use only data the other owner has shared or authorized.

@@ -9,6 +9,8 @@ Answer the question so the player can act without opening a website. Sources sup
 
 ## Resolve only what changes the answer
 
+For every request, follow [request, client and source languages](shared/wow/language.md).
+
 Reuse the established game version, language and character/faction context. If none is established, assume current Retail and state that briefly when it matters. Ask one concise question when Retail versus Classic, an ambiguous item/quest/faction name, faction, or quest phase changes the result. Accept a name, ID, game link or screenshot; resolve the actual entity rather than guessing from a similar name. Do not request a full character profile for a general mechanics question.
 
 Examples in scope: “How do I earn reputation with this faction?”, “Where can I get this item?”, “What is this item used for?”, “How do I finish this quest?” and “Why is this NPC not showing up?” A request to optimize an entire account or create a broad achievement tour belongs to `wow-achievement-plan` when available; do not silently expand a quick question into that workflow.
@@ -54,7 +56,7 @@ Make prerequisite instructions actionable: instead of only “finish the introdu
 | What an item is for | What it does, where/how it is used or turned in, what it grants, relevant prerequisites, and whether it is consumed or reusable. If asked whether to keep/sell/delete it, establish remaining uses and replaceability first; appearance or an old comment alone is not evidence it is safe to discard. |
 | How/where to do a quest | Exact quest and start/turn-in, necessary preceding unlocks, ordered objective steps, required item/vehicle/extra-action interaction, location/floor/phase and completion check. Explain the easily missed mechanic. If blocked, give a short supported check or workaround and distinguish a known bug from a missing prerequisite. |
 
-For a short factual question, a paragraph may suffice. For a multi-step answer use precise headings such as **Prerequisite check**, **Do this**, and **If blocked**. Keep background separate from actions. Name NPCs, items and quests in the user's game language, defaulting to English, and give their direct Wowhead ID links when available. Recommend a practical main method; include alternatives only when they materially help.
+For a short factual question, a paragraph may suffice. For a multi-step answer use precise headings such as **Prerequisite check**, **Do this**, and **If blocked**, in the reply language. Keep background separate from actions. Name NPCs, items and quests according to the language guidance and give their direct Wowhead ID links when available. Recommend a practical main method; include alternatives only when they materially help.
 
 Always include clickable sources next to the claims or instructions they support. Link the exact Wowhead entity/guide or comment permalink when available; otherwise link its parent page and identify the relevant commenter/date. Distinguish verified instructions, player-reported workarounds and unresolved uncertainty. Never answer with only a search link, a pasted tooltip or “read the comments.”
 

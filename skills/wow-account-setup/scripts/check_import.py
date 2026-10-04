@@ -24,6 +24,56 @@ def rejects(call):
     raise AssertionError("Invalid input was accepted")
 
 
+def check_localized():
+    collector_text = (FIXTURES / 'collector.lua').read_text(encoding='utf-8')
+    att_text = (FIXTURES / 'att.lua').read_text(encoding='utf-8')
+    for name, realm, location, region in [
+        ('Mära', 'Die Aldor', 'Sturmwind', 'eu'),
+        ('Мара', 'Гордунни', 'Штормград', 'eu'),
+        ('마라', '아즈샤라', '스톰윈드', 'kr'),
+        ('瑪拉', '銀翼要塞', '暴風城', 'tw'),
+    ]:
+        # Raw UTF-8 and Lua decimal-byte escapes must identify the same player.
+        escaped = ''.join(f'\\{byte:03d}' for byte in name.encode('utf-8'))
+        localized_c = collector_text.replace('"Ada"', f'"{escaped}"').replace(
+            'level = 80,', f'level = 80, currentLocation = "{location}", bindLocation = "{location}",')
+        localized_a = att_text.replace('"Ada"', f'"{name}"').replace('Test Realm One', realm).replace('Test Realm Two', realm + ' II')
+        collector = parse_lua(localized_c)['WWTCSaved']
+        att = parse_lua(localized_a)['ATTCharacterData']
+        with tempfile.TemporaryDirectory(prefix='wow-localized-check-') as directory:
+            root = Path(directory)
+            cp, ap, output, markdown = [root / filename for filename in ('collector.lua', 'att.lua', 'account.json', 'coverage.md')]
+            cp.write_text(localized_c, encoding='utf-8')
+            ap.write_text(localized_a, encoding='utf-8')
+            cmd = [sys.executable, str(SCRIPT), '--collector', str(cp), '--att', str(ap), '--account', name, '--region', region, '--output', str(output), '--report', str(markdown)]
+            subprocess.run(cmd, capture_output=True, check=True)
+            saved = json.loads(output.read_text(encoding='utf-8'))
+            assert saved['account'] == name and saved['region'] == region
+            assert set(saved['characters']) == {G1, G2}
+            assert saved['coverage']['identities']['matched'] == 2
+            for guid, expected_realm in [(G1, realm), (G2, realm + ' II')]:
+                assert saved['characters'][guid]['identity']['name'] == name
+                assert saved['characters'][guid]['identity']['realm'] == expected_realm
+            fields = saved['characters'][G1]['observations']
+            baseline = import_data(parse_lua(collector_text)['WWTCSaved'], att, name, region)
+            for field in ('currencies', 'reputations', 'professions', 'achievements', 'inventory'):
+                assert fields[field]['values'] == baseline['characters'][G1]['observations'][field]['values']
+            assert fields['currentLocation']['values'] == fields['bindLocation']['values'] == location
+            saved['user'] = {'notes': f'{name}: {location}', 'manual_completed_ids': [8]}
+            saved['characters'][G1]['user'] = {'notes': location}
+            repeated = import_data(collector, att, name, region, saved, saved['sources'])
+            assert repeated['characters'] == saved['characters']
+            assert repeated['coverage']['field_conflicts'] == 0
+            output.write_text(json.dumps(saved, ensure_ascii=False), encoding='utf-8')
+            subprocess.run(cmd, capture_output=True, check=True)
+            reloaded = json.loads(output.read_text(encoding='utf-8'))
+            assert reloaded['characters'] == saved['characters'] and reloaded['user'] == saved['user']
+            assert reloaded['account_observations'] == saved['account_observations']
+            assert name in output.read_text(encoding='utf-8')
+            assert f'{name}-{realm}' in markdown.read_text(encoding='utf-8')
+            assert cp.read_text(encoding='utf-8') == localized_c and ap.read_text(encoding='utf-8') == localized_a
+
+
 def check():
     assert parse_lua('DB = {name="M\\195\\164ra", x=false, n=-4, a={1,2}, z=nil}')['DB']['name'] == 'Mära'
     for bad in ['DB=os.execute("bad")', 'DB={a=function() end}', 'DB={a=1,a=2}', 'DB={', 'DB={x=1e999}', 'DB={x="\\999"}']:
@@ -128,7 +178,8 @@ def check():
         markdown.write_text('User-authored notes')
         assert subprocess.run(cmd, capture_output=True).returncode != 0
         assert output.read_bytes() == stable and markdown.read_text() == 'User-authored notes'
-    print('PASS: safe parsing, exact identities, partial coverage, timestamps, repeated/partial imports, conflicts, manual-progress preservation and CLI write safety.')
+    check_localized()
+    print('PASS: safe parsing, exact identities, partial coverage, timestamps, repeated/partial imports, conflicts, manual-progress preservation, localized UTF-8 state roundtrips and CLI write safety.')
 
 
 if __name__ == '__main__':

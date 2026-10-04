@@ -8,10 +8,10 @@ Snapshot metadata: plan/account identity, character, realm, region, game version
 
 Per achievement:
 
-- ID, English name, base points, direct Wowhead URL, game category, expansion, and search-category memberships (`quick-wins`, `buyable`, `grindable`, `long-term`, `needs-help`).
+- ID, verified display name following the skill's language guidance, base points, direct Wowhead URL, game category, expansion, and search-category memberships (`quick-wins`, `buyable`, `grindable`, `long-term`, `needs-help`).
 - Observed state (`completed`, `incomplete`, `unknown`, `unobtainable`), source/time, account versus character scope.
 - Criteria IDs and labels, required/current amounts, completed criteria, prerequisites, meta parent/child IDs.
-- Verified numeric UI map ID, floor and sourced coordinates, rendered only as `/way #MapID X Y English label` in fenced `text` blocks; executing character and travel/timeline requirements. Use spaces between coordinates; no zone-name selector or implicit current map. No bare pairs or quoted/inline commands, including history and tables; link tables to copy blocks. Unverified IDs/locations get a waypoint-unavailable note instead of guessed coordinates. Map IDs do not prove the required quest phase is active.
+- Verified numeric UI map ID, floor and sourced coordinates, rendered only as `/way #MapID X Y Label` in fenced `text` blocks, with the label following the skill's language guidance; executing character and travel/timeline requirements. Use spaces between coordinates; no zone-name selector or implicit current map. No bare pairs or quoted/inline commands, including history and tables; link tables to copy blocks. Unverified IDs/locations get a waypoint-unavailable note instead of guessed coordinates. Map IDs do not prove the required quest phase is active.
 - Group/PvP, profession/recipe, currency/gold, daily/weekly/lockout, RNG and phasing requirements.
 - Method-specific activity repeatability versus reward-credit rules; quota/reset/scope, standing ceilings or diminishing returns, availability/resource/RNG limits, source/date and verification status. A concise `limits_summary` belongs in the visible task and next-action text, not just hidden metadata.
 - Verified minimum total players and additional helpers, helper roles/actions and eligibility, ready-group duration, recruitment/coordination estimate or unknown, and current helper availability. Store filter tags/fields using the contract below.

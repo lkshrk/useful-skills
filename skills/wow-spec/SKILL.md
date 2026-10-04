@@ -9,6 +9,8 @@ Give the requested spec advice in a usable, self-contained form. Talent recommen
 
 ## Route the requested sections
 
+For every request, follow [request, client and source languages](shared/wow/language.md).
+
 - “Build” or “talents”: talents only, unless the user includes other sections.
 - “Stats”, “gems”, “enchants” or “consumables”: answer those sections without running a talent leaderboard scan unnecessarily.
 - “Full setup”: talents, general stat guidance, gems, enchants and consumables.

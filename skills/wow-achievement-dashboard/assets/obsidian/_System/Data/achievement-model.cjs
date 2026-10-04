@@ -71,6 +71,13 @@ function partition(data, tasks) {
 }
 
 
+function wowheadLink(value, type, id) {
+  if(typeof value!=='string'||/[\u0000-\u0020\u007f\\]/.test(value))return false;
+  const entity='/(?:[a-z]{2}/)?'+type+'='+id;
+  if(!new RegExp('^https://www\\.wowhead\\.com'+entity+'(?:[/#?]|$)').test(value))return false;
+  try{return new RegExp('^'+entity+'(?:/|$)').test(new URL(value).pathname);}catch{return false;}
+}
+
 function validate(data) {
   const fail=message=>{throw new Error('Achievement data: '+message);};
   const safePath=p=>typeof p==='string' && p.length>0 && !p.startsWith('/') && !p.includes('\\') && !p.split('/').includes('..') && !/^[a-z]+:/i.test(p);
@@ -91,7 +98,7 @@ function validate(data) {
     if(typeof row.name!=='string'||!row.name||!nonnegative(row.points))fail('invalid achievement name or points');
     if(!['completed','incomplete','unknown','unobtainable'].includes(row.game_state))fail('invalid game_state');
     if(!data.task_sources.includes(row.source)||!safePath(row.link))fail('task source/link must be within the vault');
-    if(typeof row.wowhead_url!=='string'||!row.wowhead_url.startsWith('https://www.wowhead.com/achievement='+row.id)||!new RegExp('^https://www\\.wowhead\\.com/achievement='+row.id+'(?:[/#?]|$)').test(row.wowhead_url))fail('achievement link must match its ID');
+    if(!wowheadLink(row.wowhead_url,'achievement',row.id))fail('achievement link must match its ID');
     if(!Array.isArray(row.categories)||!row.categories.length||!row.categories.every(c=>Object.hasOwn(labels,c)))fail('invalid categories');
     if(!Array.isArray(row.characters)||!row.characters.every(x=>typeof x==='string'))fail('characters must be an array');
     if(!['solo','group','unknown'].includes(row.players)||!['ready','conditional','verify','blocked'].includes(row.readiness))fail('invalid players/readiness');
@@ -102,7 +109,7 @@ function validate(data) {
   for(const item of data.shopping){
     if(typeof item.purchase_id!=='string'||!item.purchase_id||purchases.has(item.purchase_id))fail('purchase_id must be unique');
     purchases.add(item.purchase_id);
-    if(!Number.isInteger(item.item_id)||item.item_id<=0||item.wowhead_url!=='https://www.wowhead.com/item='+item.item_id)fail('purchase item link must match item_id');
+    if(!Number.isInteger(item.item_id)||item.item_id<=0||!wowheadLink(item.wowhead_url,'item',item.item_id))fail('purchase item link must match item_id');
     if(typeof item.name!=='string'||typeof item.currency_label!=='string'||typeof item.character!=='string')fail('purchase labels must be strings');
     if(item.unit_cost!==null&&!nonnegative(item.unit_cost))fail('unit_cost must be nonnegative or null');
     if(item.owned_usable!==null&&!nonnegative(item.owned_usable))fail('owned_usable must be nonnegative or null');
