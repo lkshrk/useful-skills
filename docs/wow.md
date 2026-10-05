@@ -49,6 +49,54 @@ npx skills add lkshrk/useful-skills --skill wow-help wow-spec wow-account-setup 
    profile (sites that track your characters), or addon data saved in your
    WoW folder — and only asks for the missing pieces.
 
+## Example commands
+
+Paste these into Codex chat to invoke a skill explicitly. In ChatGPT or Claude,
+you can use the request after the `$skill-name` as a plain-language prompt.
+Replace the game version, character details and goals with your own.
+
+### Quick help (`wow-help`)
+
+```text
+$wow-help In Retail, how do I unlock flying in Battle for Azeroth zones? Include any prerequisites.
+$wow-help In MoP Classic, where is the Alliance Shado-Pan quartermaster, and what can I buy at Revered? Include TomTom waypoints.
+```
+
+### Builds and talents (`wow-spec`)
+
+```text
+$wow-spec Recommend a current Retail Frost Mage Mythic+ build with a talent import, stat priorities, gems, enchants and consumables.
+$wow-spec Give me a MoP Classic Protection Paladin raid setup using Wowhead as the source. Include talents and glyphs.
+```
+
+### Account setup (`wow-account-setup`)
+
+```text
+$wow-account-setup Set up my Retail account for achievement planning. Help me find usable character data and save the setup as plain Markdown.
+$wow-account-setup Resume setup for our two Retail accounts. Check existing sources and ask only for missing character identities or scans.
+```
+
+### Personal plans (`wow-achievement-plan`)
+
+```text
+$wow-achievement-plan Using my configured Retail account, plan 90 minutes of unfinished Pandaria achievements. Include eligible characters and TomTom waypoints; save as Markdown.
+$wow-achievement-plan Plan my TBC Anniversary Cenarion Expedition reputation grind to Exalted. Show prerequisites, repeatable steps and realistic time estimates.
+```
+
+### Dashboards (`wow-achievement-dashboard`)
+
+```text
+$wow-achievement-dashboard Turn my existing Retail achievement plan into a dated Markdown dashboard with progress and next actions.
+$wow-achievement-dashboard Refresh my existing MoP Classic achievement dashboard in Obsidian using current data and preserve my manual notes.
+```
+
+### Two-player tours (`wow-duo-world-tour`)
+
+```text
+$wow-duo-world-tour Using our configured Retail accounts, plan a two-hour Pandaria achievement route for us. Show who needs each objective and who gets credit.
+$wow-duo-world-tour Plan a 90-minute quest and profession route for our two TBC Anniversary characters. Check that we can group and save a shared Markdown checklist.
+```
+
 ## Good to know
 
 - **Game versions:** use Retail, a specific Classic variant, or Forever. If the
