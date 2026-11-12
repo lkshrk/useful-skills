@@ -4,19 +4,18 @@
   "spec": "Subtlety Rogue",
   "game": "retail",
   "season": "season-mn-2",
-  "verified_patch": "12.1",
-  "verified_at": "2026-10-04",
+  "verified_patch": "12.1.5",
+  "verified_at": "2026-10-26",
   "status": "verified",
   "scope": "Max-level PvE guide baseline; no personal optimization.",
   "sources": [
     {
       "url": "https://www.method.gg/guides/subtlety-rogue/stats-races-and-consumables",
-      "updated": "2026-08-19"
+      "updated": "2026-10-16"
     },
     {
-      "url": "https://www.icy-veins.com/wow/subtlety-rogue-pve-dps-gems-enchants-consumables",
-      "updated": "2026-08-10",
-      "scope": "Shoulder enchant only; remaining baseline follows Method."
+      "url": "https://murlok.io/rogue/subtlety/m+",
+      "updated": null
     }
   ],
   "stat_guidance": {
@@ -60,5 +59,9 @@
     "Poison selection and interaction with oil not verified.",
     "Exact item quality ranks and full use/cooldown restrictions not independently verified."
   ],
-  "validation_scope": "Current guide recommendations and linked item identities; not a personal simulation."
+  "validation_scope": "Current guide recommendations and linked item identities; not a personal simulation.",
+  "acknowledged_differences": {
+    "differences": "e23b6c9cccc48d0628973b289b3529383133bb3b5b58eb4304e93a989f44c9b4",
+    "sections": "a0477f1a3aee8a9cf2bbca4e30277a24018f17db907a8d3ba1b8393ab6ce82b5"
+  }
 }

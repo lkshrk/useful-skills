@@ -4,6 +4,11 @@
   "description": "A collection of useful agent skills.",
   "skills": [
     "./skills/ai-context-generator",
+    "./skills/linear-implement",
+    "./skills/linear-intake",
+    "./skills/linear-reconcile",
+    "./skills/linear-refine",
+    "./skills/linear-status",
     "./skills/litho-document-skill",
     "./skills/loc-change-table",
     "./skills/mac-disk-reclaim",

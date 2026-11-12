@@ -21,10 +21,14 @@
     "release:check:node": "tsx scripts/verify_release.ts",
     "install:smoke:node": "tsx scripts/install_smoke.ts",
     "skills:sync:node": "tsx scripts/sync_skill_references.ts",
-    "skills:sync:check:node": "tsx scripts/sync_skill_references.ts --check"
+    "skills:sync:check:node": "tsx scripts/sync_skill_references.ts --check",
+    "validate": "bun scripts/validate_issue.ts examples/issue.md"
   },
   "devDependencies": {
     "lefthook": "^2.1.9",
     "tsx": "^4.20.6"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
   }
 }

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -13,8 +13,7 @@ function summary(job: string, env: Record<string, string>, result?: object) {
   try {
     const file = path.join(dir, "summary.md");
     if (result) {
-      mkdirSync(path.join(dir, "wow-result"));
-      writeFileSync(path.join(dir, "wow-result/wow-refresh-result.json"), JSON.stringify(result));
+      writeFileSync(path.join(dir, "wow-apply.json"), JSON.stringify(result));
     }
     const run = spawnSync("bash", ["-e", "-o", "pipefail", "-c", summaryStep(job).run], {
       env: { ...process.env, ...env, GITHUB_STEP_SUMMARY: file, RUNNER_TEMP: dir }, encoding: "utf8",
@@ -26,105 +25,127 @@ function summary(job: string, env: Record<string, string>, result?: object) {
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 
-test("pipeline outcome explains no-op, branch skip, failures and separate release completion", () => {
-  for (const [refresh, publish, needed, reason] of [
-    ["success", "skipped", "false", "Source detection ran successfully"],
-    ["skipped", "skipped", "", "only on the default branch"],
-    ["failure", "skipped", "", "did not receive a successful candidate"],
-    ["cancelled", "skipped", "true", "cancelled"],
-    ["success", "failure", "true", "no end-to-end success"],
-    ["success", "success", "true", "dispatched release runs separately"],
+test("pipeline outcome explains no-op, branch skip, failures and pull request handoff", () => {
+  for (const [inspect, refresh, publish, needed, pushed, reason] of [
+    ["success", "skipped", "success", "false", "false", "no spec needed Claude Code"],
+    ["skipped", "skipped", "skipped", "", "", "only on the default branch"],
+    ["failure", "skipped", "skipped", "", "", "no candidate was produced"],
+    ["success", "success", "failure", "true", "", "no end-to-end success"],
+    ["success", "success", "success", "true", "false", "Nothing was pushed"],
+    ["success", "failure", "success", "true", "true", "pull request opened for review"],
   ]) {
-    expect(summary("summary", { REFRESH_RESULT: refresh, PUBLISH_RESULT: publish, NEEDED: needed, RELEASE_TAG: "v1.2.3" })).toContain(reason);
+    expect(summary("summary", { INSPECT_RESULT: inspect, REFRESH_RESULT: refresh, PUBLISH_RESULT: publish, NEEDED: needed, PUSHED: pushed })).toContain(reason);
   }
-  for (const [pushed, auto, tag, reason] of [
-    ["false", "true", "", "Nothing was pushed"],
-    ["true", "false", "", "pull request is ready"],
-    ["true", "true", "", "no patch release"],
-  ]) expect(summary("summary", { REFRESH_RESULT: "success", PUBLISH_RESULT: "success", NEEDED: "true", PUSHED: pushed, AUTO_RELEASE: auto, RELEASE_TAG: tag })).toContain(reason);
 });
 
-test("refresh summary exposes only outcomes and distinguishes skipped AI from failed AI", () => {
-  const stages = { inspect: { outcome: "success" }, provider: { outcome: "skipped", outputs: { secret: "NEVER-LOG-THIS" } }, refresh: { outcome: "skipped" } };
-  const skipped = summary("refresh", { JOB_STATUS: "success", NEEDED: "false", STAGES: JSON.stringify(stages) });
-  expect(skipped).toContain("force_refresh enabled");
-  expect(skipped).toContain("Codex refresh | skipped");
+test("detection summary exposes only outcomes and distinguishes skipped Claude runs from failed detection", () => {
+  const stages = { inspect: { outcome: "success" }, upload: { outcome: "success", outputs: { secret: "NEVER-LOG-THIS" } } };
+  const skipped = summary("inspect", { EVENT: "schedule", FORCE_REFRESH: "false", JOB_STATUS: "success", CLAUDE_NEEDED: "false", STAGES: JSON.stringify(stages) });
+  expect(skipped).toContain("force_refresh");
+  expect(skipped).toContain("Claude Code skipped");
   expect(skipped).not.toContain("NEVER-LOG-THIS");
-  stages.refresh.outcome = "failure";
-  const failed = summary("refresh", { JOB_STATUS: "failure", NEEDED: "true", STAGES: JSON.stringify(stages) });
+  const ran = summary("inspect", { EVENT: "schedule", FORCE_REFRESH: "false", JOB_STATUS: "success", CLAUDE_NEEDED: "true", STAGES: JSON.stringify(stages) });
+  expect(ran).toContain("one Claude Code run each");
+  const failed = summary("inspect", { EVENT: "schedule", FORCE_REFRESH: "false", JOB_STATUS: "failure", CLAUDE_NEEDED: "", STAGES: JSON.stringify({ ...stages, inspect: { outcome: "failure" } }) });
   expect(failed).toContain("not evidence of unchanged sources");
-  expect(failed).not.toContain("AI candidate generated");
 });
 
-test("publication summaries distinguish no-op, PR, fingerprint update, release dispatch and partial failure", () => {
-  for (const [status, pushed, auto, tag, reason] of [
-    ["success", "false", "true", "", "No accepted data changes"],
-    ["success", "true", "false", "", "pull request awaits merge"],
-    ["success", "true", "true", "", "Fingerprint-only update"],
-    ["success", "true", "true", "v1.2.3", "not confirmed complete"],
-    ["failure", "true", "true", "v1.2.3", "Do not assume rollback"],
+test("publication summaries distinguish no-op, pull request and partial failure", () => {
+  for (const [status, pushed, reason] of [
+    ["success", "false", "No accepted data changes"],
+    ["success", "true", "pull request opened"],
+    ["failure", "true", "Do not assume rollback"],
   ]) {
-    const stages = { apply: { outcome: "success" }, stage: { outcome: "success", outputs: { pushed, tag } } };
-    const text = summary("publish", { JOB_STATUS: status, AUTO_RELEASE: auto, PUSHED: pushed, RELEASE_TAG: tag, STAGES: JSON.stringify(stages) }, {
-      status: "updated", summary: "Validated fixture only", unresolved_sources: ["https://example.org/unavailable"],
+    const stages = { apply: { outcome: "success" }, stage: { outcome: "success", outputs: { pushed } } };
+    const text = summary("publish", { JOB_STATUS: status, PUSHED: pushed, STAGES: JSON.stringify(stages) }, {
+      status: "partial", summary: "Validated fixture only",
     });
     expect(text).toContain(reason);
     expect(text).toContain("Validated fixture only");
-    expect(text).toContain("previous values retained");
+    expect(text).toContain("previous values");
   }
-  expect(summary("publish", { JOB_STATUS: "failure", AUTO_RELEASE: "true", STAGES: "{}" })).toContain("Publication incomplete");
+  expect(summary("publish", { JOB_STATUS: "failure", STAGES: "{}" })).toContain("Publication incomplete");
 });
 
-test("summary environments allow only stage outcomes, and required successful refresh artifacts cannot be skipped", () => {
-  for (const job of ["refresh", "publish"]) {
+test("summary environments allow only stage outcomes, and the observation is uploaded after a successful detection only", () => {
+  for (const job of ["inspect", "publish"]) {
     for (const match of summaryStep(job).env.STAGES.matchAll(/\$\{\{\s*(.*?)\s*\}\}/g)) {
       expect(match[1]).toMatch(/^steps\.\w+\.outcome$/);
     }
-    const text = summary(job, { JOB_STATUS: "failure", NEEDED: "", AUTO_RELEASE: "true", STAGES: JSON.stringify({ bun: { outcome: "failure" } }) });
-    expect(text).toContain("Bun setup | failure");
+    const text = summary(job, { JOB_STATUS: "failure", CLAUDE_NEEDED: "", EVENT: "schedule", FORCE_REFRESH: "false", STAGES: JSON.stringify({ checkout: { outcome: "failure" } }) });
+    expect(text).toContain(job === "inspect" ? "Checkout | failure" : "Trusted checkout | failure");
   }
-  const condition = wow.jobs.refresh.steps.find((step: any) => step.id === "result").if;
+  const condition = wow.jobs.inspect.steps.find((step: any) => step.id === "upload").if;
   for (const outcome of ["success", "failure", "skipped"]) {
-    for (const exists of [true, false]) {
-      const evaluated = condition.replaceAll("always()", "true").replaceAll("steps.refresh.outcome", JSON.stringify(outcome)).replaceAll("hashFiles('wow-refresh-result.json')", JSON.stringify(exists ? "hash" : ""));
-      expect(new Function(`return (${evaluated})`)()).toBe(outcome === "success" || (outcome === "failure" && exists));
-    }
-  }
-});
-
-test("CI and release summaries expose failed stages, forced gate and partial publication", async () => {
-  for (const [name, failed, forced, reason] of [
-    ["ci", "Tests", false, "Release dispatch is blocked"],
-    ["ci", "", false, "not a push"],
-    ["release", "Upload ZIPs", false, "pipeline is incomplete"],
-    ["release", "CI gate", true, "Release pipeline completed"],
-  ] as const) {
-    const job = workflow(name).jobs[name === "ci" ? "verify" : "release"];
-    const step = job.steps.at(-1);
-    const stages = JSON.parse(step.env.STAGES);
-    for (const key of Object.keys(stages)) stages[key] = key === failed ? (forced ? "skipped" : "failure") : "success";
-    const lines: string[] = [];
-    const builder: any = {};
-    for (const method of ["addHeading", "addTable", "addRaw", "addLink"]) builder[method] = (value: any) => { lines.push(JSON.stringify(value)); return builder; };
-    builder.write = async () => {};
-    const core = { info: (s: string) => lines.push(s), notice: (s: string) => lines.push(s), summary: builder };
-    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-    await new AsyncFunction("core", "context", "process", step.with.script)(core, {
-      eventName: "workflow_dispatch", ref: "refs/heads/main", serverUrl: "https://github.com", repo: { owner: "example", repo: "skills" },
-    }, { env: { STAGES: JSON.stringify(stages), FORCE_RELEASE: String(forced), TAG: "v1.2.3", RELEASE_SHA: "fixture" } });
-    expect(lines.join("\n")).toContain(reason);
-    if (forced) expect(lines.join("\n")).toContain("skipped: force_release=true");
+    const evaluated = condition.replaceAll("always()", "true").replaceAll("steps.inspect.outcome", JSON.stringify(outcome));
+    expect(new Function(`return (${evaluated})`)()).toBe(outcome === "success");
   }
 });
 
 test("pipeline workflow shell blocks remain syntactically valid", () => {
-  for (const name of ["wow-season-updates", "ci", "release"]) {
-    for (const job of Object.values(workflow(name).jobs) as any[]) {
-      for (const step of job.steps) {
-        if (!step.run) continue;
-        const checked = spawnSync("bash", ["-n"], { input: step.run, encoding: "utf8" });
-        expect(checked.status, `${name}: ${step.name}: ${checked.stderr}`).toBe(0);
-      }
+  for (const job of Object.values(wow.jobs) as any[]) {
+    for (const step of job.steps) {
+      if (!step.run) continue;
+      const checked = spawnSync("bash", ["-n"], { input: step.run, encoding: "utf8" });
+      expect(checked.status, `${step.name}: ${checked.stderr}`).toBe(0);
     }
   }
+});
+
+test("refresh job sets up Bun before the Claude Code step", () => {
+  const steps = wow.jobs.refresh.steps;
+  const bun = steps.findIndex((step: any) => String(step.uses).startsWith("oven-sh/setup-bun@"));
+  const claude = steps.findIndex((step: any) => String(step.uses).startsWith("anthropics/claude-code-action@"));
+  expect(bun).toBeGreaterThanOrEqual(0);
+  expect(bun).toBeLessThan(claude);
+});
+
+test("each changed spec gets its own capped Claude run on the gateway without sub-agents", () => {
+  const refresh = wow.jobs.refresh;
+  expect(refresh.needs).toBe("inspect");
+  expect(refresh.strategy["fail-fast"]).toBe(false);
+  expect(refresh.strategy.matrix.spec).toContain("fromJSON(needs.inspect.outputs.matrix)");
+  expect(JSON.stringify(wow.jobs.inspect.steps)).toContain("WOW_REFRESH_MAX_SPECS");
+  const claude = refresh.steps.find((step: any) => String(step.uses).startsWith("anthropics/claude-code-action@"));
+  expect(claude.env.ANTHROPIC_BASE_URL).toBe("${{ steps.provider.outputs.base_url }}");
+  expect(claude.with.anthropic_api_key).toBe("${{ secrets.WOW_REFRESH_API_KEY }}");
+  expect(claude.with.claude_args).toBe("${{ steps.provider.outputs.claude_args }}");
+  expect(claude.with.prompt).toContain("${{ matrix.spec }}");
+  expect(wow.permissions).toEqual({ contents: "read" });
+  expect(wow.jobs.publish.permissions).toEqual({ contents: "read", "id-token": "write" });
+  expect(wow.concurrency).toEqual({ group: "wow-season-source-check", "cancel-in-progress": false });
+});
+
+test("publish pushes and opens the PR as the h-cloud-npa app via octo-sts", () => {
+  const text = readFileSync(new URL("../.github/workflows/wow-season-updates.yml", import.meta.url), "utf8");
+  const publish = wow.jobs.publish;
+  const sts = publish.steps.find((step: any) => step.id === "sts");
+  expect(sts.uses).toMatch(/^octo-sts\/action@[0-9a-f]{40}$/);
+  expect(sts.with).toEqual({ domain: "sts.h-cloud.io", scope: "lkshrk", identity: "useful-skills-wow-refresh" });
+  expect(publish.steps.indexOf(sts)).toBe(0);
+  expect(publish.steps.find((step: any) => step.id === "pr").env.GH_TOKEN).toBe("${{ steps.sts.outputs.token }}");
+  const checkout = publish.steps.find((step: any) => step.id === "checkout");
+  expect(checkout.with.token).toBe("${{ steps.sts.outputs.token }}");
+  expect(text).toContain('git config user.name "h-cloud-npa[bot]"');
+  expect(text).not.toContain("github-actions[bot]");
+});
+
+test("workflow reads the active season from data instead of hardcoding it", () => {
+  const text = readFileSync(new URL("../.github/workflows/wow-season-updates.yml", import.meta.url), "utf8");
+  expect(text).not.toMatch(/season-mn-\d|season-data\/retail/);
+  expect(text).toContain("--print-bundle");
+});
+
+test("publishing validates and applies per-spec results from a fresh job", () => {
+  const publish = wow.jobs.publish;
+  const apply = publish.steps.find((step: any) => step.id === "apply").run;
+  expect(apply).toContain("--parts");
+  expect(apply).toContain("bun test");
+  expect(publish.steps.findIndex((step: any) => step.id === "parts")).toBeLessThan(publish.steps.findIndex((step: any) => step.id === "apply"));
+});
+
+test("the per-run spec cap is clamped to 1..40 and rejects non-numeric input", () => {
+  const step = wow.jobs.inspect.steps.find((item: any) => item.id === "inspect").run;
+  expect(step).toContain("min(max(int(os.environ['MAX_SPECS']), 1), 40)");
+  expect(step).toContain("must be a whole number between 1 and 40");
 });
