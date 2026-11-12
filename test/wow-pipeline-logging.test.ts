@@ -32,7 +32,7 @@ test("pipeline outcome explains no-op, branch skip, failures and pull request ha
     ["failure", "skipped", "skipped", "", "", "no candidate was produced"],
     ["success", "success", "failure", "true", "", "no end-to-end success"],
     ["success", "success", "success", "true", "false", "Nothing was pushed"],
-    ["success", "failure", "success", "true", "true", "pull request opened for review"],
+    ["success", "failure", "success", "true", "true", "pull request opened with auto-merge"],
   ]) {
     expect(summary("summary", { INSPECT_RESULT: inspect, REFRESH_RESULT: refresh, PUBLISH_RESULT: publish, NEEDED: needed, PUSHED: pushed })).toContain(reason);
   }
@@ -148,4 +148,27 @@ test("the per-run spec cap is clamped to 1..40 and rejects non-numeric input", (
   const step = wow.jobs.inspect.steps.find((item: any) => item.id === "inspect").run;
   expect(step).toContain("min(max(int(os.environ['MAX_SPECS']), 1), 40)");
   expect(step).toContain("must be a whole number between 1 and 40");
+});
+
+test("publish enables squash auto-merge with the app token and bumps the version only for recommendation changes", () => {
+  const publish = wow.jobs.publish;
+  const pr = publish.steps.find((step: any) => step.id === "pr");
+  expect(pr.env.GH_TOKEN).toBe("${{ steps.sts.outputs.token }}");
+  expect(pr.run).toContain('gh pr merge "$STAGING_BRANCH" --auto --squash');
+  const stage = publish.steps.find((step: any) => step.id === "stage").run as string;
+  const bump = stage.indexOf("create_release.ts patch --no-commit");
+  expect(bump).toBeGreaterThan(stage.indexOf('if [ "$RELEASE" = "true" ]'));
+  expect(bump).toBeLessThan(stage.indexOf("else"));
+});
+
+test("the release runs only for a merged refresh pull request from this repository and waits for CI", () => {
+  const release = workflow("wow-release");
+  expect(release.on).toEqual({ pull_request: { types: ["closed"], branches: ["main"] } });
+  const job = release.jobs.release;
+  expect(job.if).toContain("github.event.pull_request.merged == true");
+  expect(job.if).toContain("github.event.pull_request.head.ref == 'automation/wow-season-refresh'");
+  expect(job.if).toContain("github.event.pull_request.head.repo.full_name == github.repository");
+  const ids = job.steps.map((step: any) => step.id);
+  expect(ids.indexOf("ci")).toBeLessThan(ids.indexOf("dispatch"));
+  expect(job.steps.find((step: any) => step.id === "dispatch").run).toContain("gh workflow run release.yml");
 });

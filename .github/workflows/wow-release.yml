@@ -1,0 +1,73 @@
+name: WoW refresh release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wow-refresh-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'automation/wow-season-refresh' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ github.event.pull_request.merge_commit_sha }}
+    steps:
+      - name: Check out merge commit
+        id: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          tag="v$(jq -r .version package.json)"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists: the refresh changed no recommendation, so nothing is released." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Releasing $tag from merge commit $SHA." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for CI on the merge commit
+        id: ci
+        if: steps.tag.outputs.release == 'true'
+        run: |
+          run_id=""
+          for attempt in $(seq 1 30); do
+            run_id="$(gh run list --workflow ci.yml --event push --commit "$SHA" --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+            [ -n "$run_id" ] && break
+            echo "Waiting for the CI run on $SHA ($attempt/30)."
+            sleep 10
+          done
+          [ -n "$run_id" ] || { echo "No CI run started for $SHA." >&2; exit 1; }
+          gh run watch "$run_id" --exit-status --interval 20
+
+      - name: Tag and dispatch the release
+        id: dispatch
+        if: steps.tag.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git tag "$TAG" "$SHA"
+          git push origin "refs/tags/$TAG"
+          gh workflow run release.yml --ref "$TAG" -f tag="$TAG" -f sha="$SHA" -f force_release=false \
+            -f summary="Seasonal WoW setup data refresh (#${{ github.event.pull_request.number }})."
+          echo "Dispatched release.yml for $TAG." | tee -a "$GITHUB_STEP_SUMMARY"
