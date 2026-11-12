@@ -2,7 +2,7 @@
 
 You are running unattended in a scheduled repository-maintenance workflow, for exactly one spec. A deterministic pre-check found that this spec's recommendations differ from the live guide. Do the research and edit the data; do not ask for confirmation. Do not start sub-agents.
 
-Read `wow-spec-task.json` in the workspace root. It holds the spec JSON, the exact differences found, the catalogue records it references, the live guide sections (with `[item:ID]` markers) and the murlok.io cross-check. Read `plugins/personal/skills/wow-spec/references/season-setup.md` only if you need the data conventions.
+Read `wow-spec-task.json` in the workspace root. It holds the spec JSON, the exact differences found, the catalogue records it references, the live guide sections (with `[item:ID]` markers) and the murlok.io cross-check. Read `skills/wow-spec/references/season-setup.md` only if you need the data conventions.
 
 ## Write scope
 
