@@ -4,14 +4,18 @@
   "spec": "Fire Mage",
   "game": "retail",
   "season": "season-mn-2",
-  "verified_patch": "12.1",
-  "verified_at": "2026-10-04",
+  "verified_patch": "12.1.5",
+  "verified_at": "2026-10-26",
   "status": "verified",
   "scope": "Max-level PvE guide baseline; no personal simulation.",
   "sources": [
     {
       "url": "https://www.method.gg/guides/fire-mage/stats-races-and-consumables",
-      "updated": "2026-08-17"
+      "updated": "2026-10-14"
+    },
+    {
+      "url": "https://murlok.io/mage/fire/m+",
+      "updated": null
     }
   ],
   "stat_guidance": {
@@ -54,5 +58,9 @@
   "validation_scope": "Guide-backed baseline and tooltip-verified linked identities; conditional examples and remaining limitations are explicit.",
   "derivation_notes": [
     "Named examples were resolved from sourced stat-family requirements plus live item tooltips; no character simulation was performed."
-  ]
+  ],
+  "acknowledged_differences": {
+    "differences": "6a637f31e66a0a671487cb6deb125e7c02427f4dc10e5aa1dced70b2c410bdaa",
+    "sections": "ee1114402508d2d4c30b03fcffd041e3b2ac88569edc26868ad30574197f9403"
+  }
 }

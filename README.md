@@ -15,6 +15,7 @@ A collection of useful agent skills, packaged as a Codex / Claude Code plugin.
 | Skill | Purpose |
 | --- | --- |
 | `ai-context-generator` | Generate a tiered `.ai-context` knowledge base for coding agents. |
+| `linear-*` | Linear issue workflow: `linear-intake`, `linear-refine`, `linear-implement`, `linear-status`, `linear-reconcile`. See [docs/workflow.md](docs/workflow.md). |
 | `litho-document-skill` | Generate C4 architecture docs for a codebase. |
 | `loc-change-table` | Line-change stats per repo and file category since a date. |
 | `mac-disk-reclaim` | Find and safely delete disk bloat on macOS. |
@@ -28,7 +29,8 @@ A collection of useful agent skills, packaged as a Codex / Claude Code plugin.
 - `skills/` — one directory per skill, each with a `SKILL.md`.
 - `.codex-plugin/plugin.json` — Codex plugin manifest (`skills: "./skills/"`).
 - `.claude-plugin/plugin.json` — Claude Code plugin manifest (explicit skill list).
-- `scripts/` — release, packaging and WoW season-refresh tooling.
+- `scripts/` — release, packaging, Linear issue validators and WoW season-refresh tooling.
+- `docs/`, `templates/`, `examples/` — sources that `make skills-sync` copies into the skills that reference them.
 - `test/` — test suite (`bun test`).
 
 ## Development
@@ -55,5 +57,8 @@ creates the GitHub release and bumps the `useful-skills` entry in
 `lkshrk/agent-marketplace` (requires the `MARKETPLACE_PUSH_TOKEN` secret).
 Each release also attaches upload ZIPs for chat apps (`make skill-zips`).
 
-Patch releases are also cut automatically when the weekly WoW season refresh
-updates the `wow-spec` data (`.github/workflows/wow-season-updates.yml`).
+The weekly WoW season refresh (`.github/workflows/wow-season-updates.yml`) opens
+a pull request with updated `wow-spec` data; cut a patch release after merging it.
+It needs secret `WOW_REFRESH_API_KEY` and variables `WOW_REFRESH_BASE_URL` and
+`WOW_REFRESH_MODEL` (an Anthropic-compatible gateway), and the octo-sts identity
+`useful-skills-wow-refresh` in `lkshrk/.github`.
