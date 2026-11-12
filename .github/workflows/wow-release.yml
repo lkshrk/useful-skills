@@ -26,29 +26,45 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       SHA: ${{ github.event.pull_request.merge_commit_sha }}
+      PR: ${{ github.event.pull_request.number }}
     steps:
       - name: Check out merge commit
         id: checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
 
-      - name: Resolve release tag
-        id: tag
+      - name: Decide whether the pull request releases
+        id: decide
         run: |
-          tag="v$(jq -r .version package.json)"
-          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
-            echo "$tag already exists: the refresh changed no recommendation, so nothing is released." | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "release=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Releasing $tag from merge commit $SHA." | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "tag=$tag" >> "$GITHUB_OUTPUT"
-            echo "release=true" >> "$GITHUB_OUTPUT"
+          git fetch --quiet origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          version_at() { git show "$1:package.json" | jq -r .version; }
+          fork_point="$(git merge-base refs/remotes/pr/head "$SHA^")"
+          if [ "$(version_at "$fork_point")" = "$(version_at refs/remotes/pr/head)" ]; then
+            echo "Pull request #$PR did not bump the version: nothing to release." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "action=skip" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          tag="v$(version_at "$SHA")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if ! git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "Releasing $tag from merge commit $SHA." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "action=release" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git fetch --quiet --force origin "refs/tags/$tag:refs/tags/$tag"
+          target="$(git rev-parse "$tag^{commit}")"
+          if [ "$target" != "$SHA" ]; then
+            echo "::error::Version collision: $tag already points at $target, not at merge commit $SHA. Release the refresh with a new version by hand."
+            exit 1
+          fi
+          echo "$tag already points at $SHA: dispatching the release again." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "action=redispatch" >> "$GITHUB_OUTPUT"
 
       - name: Wait for CI on the merge commit
         id: ci
-        if: steps.tag.outputs.release == 'true'
+        if: steps.decide.outputs.action != 'skip'
         run: |
           run_id=""
           for attempt in $(seq 1 30); do
@@ -60,14 +76,21 @@ jobs:
           [ -n "$run_id" ] || { echo "No CI run started for $SHA." >&2; exit 1; }
           gh run watch "$run_id" --exit-status --interval 20
 
-      - name: Tag and dispatch the release
-        id: dispatch
-        if: steps.tag.outputs.release == 'true'
+      - name: Push the tag
+        id: tag
+        if: steps.decide.outputs.action == 'release'
         env:
-          TAG: ${{ steps.tag.outputs.tag }}
+          TAG: ${{ steps.decide.outputs.tag }}
         run: |
           git tag "$TAG" "$SHA"
           git push origin "refs/tags/$TAG"
+
+      - name: Dispatch the release
+        id: dispatch
+        if: steps.decide.outputs.action != 'skip'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+        run: |
           gh workflow run release.yml --ref "$TAG" -f tag="$TAG" -f sha="$SHA" -f force_release=false \
-            -f summary="Seasonal WoW setup data refresh (#${{ github.event.pull_request.number }})."
+            -f summary="Seasonal WoW setup data refresh (#$PR)."
           echo "Dispatched release.yml for $TAG." | tee -a "$GITHUB_STEP_SUMMARY"

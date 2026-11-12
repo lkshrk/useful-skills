@@ -310,10 +310,20 @@ jobs:
           echo "Recommendation change: $RELEASE"
           if [ "$RELEASE" = "true" ]; then
             git commit -m "fix(wow): refresh seasonal setup bundle"
+            dirty="$(git status --porcelain)"
+            if [ -n "$dirty" ]; then
+              printf '::error::Cannot bump the version, the working tree has files outside the refresh commit:\n%s\n' "$dirty"
+              exit 1
+            fi
             bun scripts/create_release.ts patch --no-commit
+            manifests=(package.json .codex-plugin/plugin.json .claude-plugin/plugin.json)
+            unexpected="$(git status --porcelain -- . ':!package.json' ':!.codex-plugin/plugin.json' ':!.claude-plugin/plugin.json')"
+            if [ -n "$unexpected" ]; then
+              printf '::error::The version bump changed more than the manifests:\n%s\n' "$unexpected"
+              exit 1
+            fi
             version="$(jq -r .version package.json)"
-            git add package.json .codex-plugin/plugin.json .claude-plugin/plugin.json
-            git commit -m "chore: release v$version"
+            git commit -m "chore: release v$version" -- "${manifests[@]}"
             echo "Bumped the plugin version to $version; the release is cut after the pull request merges." | tee -a "$GITHUB_STEP_SUMMARY"
           else
             git commit -m "chore(wow): advance seasonal verification and source fingerprints"
