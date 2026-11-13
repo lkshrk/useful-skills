@@ -21,6 +21,7 @@ A collection of useful agent skills, packaged as a Codex / Claude Code plugin.
 | `mac-disk-reclaim` | Find and safely delete disk bloat on macOS. |
 | `project-tool-allowlist` | Generate a permission allowlist for a repo's dev tools. |
 | `upgrade-deps` | Upgrade dependencies one at a time, any ecosystem incl. Flux/GitOps. |
+| `upgrade-flux-cluster` | Work a Flux cluster repo's Renovate PRs: research, fix, merge pinned to the validated head, health-gate on the live cluster, report. Reads repo specifics from `docs/upgrades.md`/`AGENTS.md`. |
 | `yabai-skhd-doctor` | Health-check and fix yabai/skhd on macOS. |
 | `wow-*` | World of Warcraft helpers: quick answers, spec builds, achievement plans, dashboards, duo tours. See [docs/wow.md](docs/wow.md). |
 
