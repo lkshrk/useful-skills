@@ -310,6 +310,21 @@ jobs:
           echo "Recommendation change: $RELEASE"
           if [ "$RELEASE" = "true" ]; then
             git commit -m "fix(wow): refresh seasonal setup bundle"
+            dirty="$(git status --porcelain)"
+            if [ -n "$dirty" ]; then
+              printf '::error::Cannot bump the version, the working tree has files outside the refresh commit:\n%s\n' "$dirty"
+              exit 1
+            fi
+            bun scripts/create_release.ts patch --no-commit
+            manifests=(package.json .codex-plugin/plugin.json .claude-plugin/plugin.json)
+            unexpected="$(git status --porcelain -- . ':!package.json' ':!.codex-plugin/plugin.json' ':!.claude-plugin/plugin.json')"
+            if [ -n "$unexpected" ]; then
+              printf '::error::The version bump changed more than the manifests:\n%s\n' "$unexpected"
+              exit 1
+            fi
+            version="$(jq -r .version package.json)"
+            git commit -m "chore: release v$version" -- "${manifests[@]}"
+            echo "Bumped the plugin version to $version; the release is cut after the pull request merges." | tee -a "$GITHUB_STEP_SUMMARY"
           else
             git commit -m "chore(wow): advance seasonal verification and source fingerprints"
             echo "Only verification metadata, fingerprints or tooltip fields changed; no recommendation update." | tee -a "$GITHUB_STEP_SUMMARY"
@@ -330,7 +345,10 @@ jobs:
           if [ -z "$(gh pr list --head "$STAGING_BRANCH" --state open --json number --jq '.[].number')" ]; then
             gh pr create --base "$DEFAULT_BRANCH" --head "$STAGING_BRANCH" \
               --title "$title" --body-file "$RUNNER_TEMP/wow-summary.md"
+          else
+            gh pr edit "$STAGING_BRANCH" --title "$title" --body-file "$RUNNER_TEMP/wow-summary.md"
           fi
+          gh pr merge "$STAGING_BRANCH" --auto --squash
           gh pr list --head "$STAGING_BRANCH" --state open --json url --jq '.[].url' | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Summarize applied refresh
@@ -354,7 +372,7 @@ jobs:
           elif os.environ['PUSHED'] == 'false':
               lines += ['', 'No accepted data changes: no staging push or pull request needed.']
           else:
-              lines += ['', 'Accepted update staged and pull request opened; it awaits review and merge.']
+              lines += ['', 'Accepted update staged and pull request opened with auto-merge; it lands once CI passes.']
           if stages.get('apply', {}).get('outcome') == 'success':
               with open(os.path.join(os.environ['RUNNER_TEMP'], 'wow-apply.json')) as source:
                   data = json.load(source)
@@ -393,7 +411,7 @@ jobs:
               if os.environ.get('PUSHED') == 'false':
                   reason = 'Detection ran (' + ai + '). No accepted data changes. Nothing was pushed.'
               else:
-                  reason = 'Detection ran (' + ai + '). Accepted update staged and a pull request opened for review. Nothing reached the default branch.'
+                  reason = 'Detection ran (' + ai + '). Accepted update staged and a pull request opened with auto-merge; it lands once CI passes, and a recommendation change is released after the merge.'
           else:
               reason = 'Detection ran; publication ' + publish + '. Inspect validation and pull request outcomes; no end-to-end success is claimed.'
           summary = '# WoW pipeline outcome\n\nDetection: ' + inspect + '\n\nClaude Code: ' + refresh + '\n\nPublication: ' + publish + '\n\n' + reason + '\n'

@@ -58,7 +58,11 @@ creates the GitHub release and bumps the `useful-skills` entry in
 Each release also attaches upload ZIPs for chat apps (`make skill-zips`).
 
 The weekly WoW season refresh (`.github/workflows/wow-season-updates.yml`) opens
-a pull request with updated `wow-spec` data; cut a patch release after merging it.
+a pull request with updated `wow-spec` data and enables auto-merge, so it lands
+once CI passes. When recommendations changed, the pull request also bumps the
+patch version, and `.github/workflows/wow-release.yml` tags the merge commit and
+dispatches `release.yml`. Fingerprint-only refreshes merge without a release.
 It needs secret `WOW_REFRESH_API_KEY` and variables `WOW_REFRESH_BASE_URL` and
 `WOW_REFRESH_MODEL` (an Anthropic-compatible gateway), and the octo-sts identity
-`useful-skills-wow-refresh` in `lkshrk/.github`.
+`useful-skills-wow-refresh` in `lkshrk/.github`. Auto-merge needs "Allow auto-merge" and a
+ruleset on `main` that requires the CI check "Test and package skills".
