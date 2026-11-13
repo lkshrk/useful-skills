@@ -11,6 +11,7 @@ describe("upgrade-flux-cluster", () => {
       "Research decides",
       "never closed",
       "--match-head-commit",
+      "Never use a helper that merges more than the PR you validated",
       "revision\n   **and** Ready",
       "RCA, not rollback",
       "git-revert the default branch **before** `helm rollback`",

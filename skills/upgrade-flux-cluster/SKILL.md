@@ -42,6 +42,7 @@ defaults below. Note for this sweep:
 | Specific | Default when the repository says nothing |
 | --- | --- |
 | Validate command | `flux-local test` or `flate test all` over the Flux path; `kustomize build` plus `kubeconform` as the last resort |
+| Merge method | the repository's setting (`gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed`) |
 | Health-gate helper | none: reconcile and wait by hand (step 6) |
 | Coupled bumps | none known: check the rendered diff for pinned companions (chart + app image, operator + CRDs) |
 | Do-not-repeat list, pitfalls, verdicts of earlier sweeps | none: say so in the report |
@@ -92,8 +93,9 @@ moved), trust the repository and report the stale note.
 5. **Validate and merge.** The repository's validate command must pass on the
    PR head. Strictly one bump per push — a failing bump must revert cleanly.
    Merge pinned to the head you validated, so a push after validation can't
-   slip in: `gh pr merge <n> --squash --match-head-commit <validated sha>`
-   (or the repository's merge helper when it pins the head itself). Merging
+   slip in: `gh pr merge <n> --<method> --match-head-commit <validated sha>`
+   with the repository's merge method (`--squash`, `--merge` or `--rebase`).
+   Never use a helper that merges more than the PR you validated. Merging
    closes the PR; that is the "close PR" step.
 6. **Health gate (mandatory, per merge).** Reconcile the source and the
    affected Kustomization (`flux reconcile kustomization <name> -n <ns>
@@ -105,8 +107,9 @@ moved), trust the repository and report the stale note.
    (`.status.history[0].chartVersion`); for image-only bumps the chart version
    never changes, so verify the pod image tag and digest actually moved.
    Hardcode namespace and release per PR — deriving them by grepping
-   `metadata.namespace` fails silently. Use the repository's health-gate
-   helper when it has one; run long waits in the background.
+   `metadata.namespace` fails silently. Use a repository health-gate helper
+   only if it gates exactly the PR you merged and merges nothing itself;
+   otherwise gate by hand. Run long waits in the background.
 7. **Verify the app, not just Helm.** Read the app's logs right after the gate,
    plus any post-bump checks the repository's notes list.
 8. **On failure: RCA, not rollback.** Keep calm. Read logs, events, the
