@@ -14,7 +14,7 @@ issue at a time; collect each issue's questions before moving on.
 ## 1. Claim
 
 Read the issue and its comments. Skip it if someone else is actively working on it
-(`docs/workflow.md` → Claiming) or it belongs to nightshift. Set yourself as assignee; the issue stays in
+(`docs/workflow.md` → Claiming) or it is delegated to dsh. Set yourself as assignee; the issue stays in
 Backlog while you refine.
 
 ## 2. Gather Evidence
@@ -63,9 +63,8 @@ description; the parent keeps the shared context.
 ## 5. Validate And Hand Off
 
 Save the description to a file and run `scripts/validate_issue.ts <file>` (`--require-design` when the
-project uses design documents). Fix every reported problem. Then move the issue to Todo, optionally add
-`ai-stage:implementation` when nightshift should continue it, and post one `<!-- linear-ai:refined -->`
-comment summarising what was clarified.
+project uses design documents). Fix every reported problem. Then move the issue to Todo and post one
+`<!-- linear-ai:refined -->` comment summarising what was clarified.
 
 If Linear write tools are unavailable, print the exact description, status change and comment for the
 human to apply.

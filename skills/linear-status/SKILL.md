@@ -21,7 +21,7 @@ Determine the phase from the issue's actual state, not from memory:
 | Blocked | blocked; quote the latest `<!-- linear-ai:blocked -->` comment | answer the question, then `linear-refine` or `linear-implement` |
 | In Review | review handoff; check whether the PR is merged | `linear-implement` (close) once merged |
 | Done without a `<!-- linear-ai:closed -->` comment | unverified close | `linear-implement` (close) |
-| delegated to nightshift or carrying its opt-in label | nightshift owns it | none |
+| delegated to the dsh app | dsh owns it | none; undelegate to take over |
 
 Report contradictions (Todo with an invalid description, Done with an open PR, an issue still carrying v1
 `llm-*` or `in-use` labels) and the smallest repair.
@@ -32,10 +32,10 @@ Check a workspace before first use, from live data (`list_teams`, `list_projects
 
 - every team in scope has the statuses Backlog, Todo, In Progress, In Review, Blocked (type started), Done,
   Canceled; report missing ones and that Blocked has to be added in the team's workflow settings;
-- the opt-in label exists (default `autopilot`) if the human uses one;
+- the dsh labels `EPIC` and `hard` exist if the workspace uses dsh;
 - type labels exist (`bug`, `feature` or a Type group);
-- leftover v1 labels (`llm-*`, `in-use`, `sp-*`, `nontechnical-intake`) and how many open issues still carry
-  them; recommend Migrate Mode.
+- leftover v1 labels (`llm-*`, `in-use`, `sp-*`, `nontechnical-intake`, `ai-stage`) and how many open
+  issues still carry them; recommend Migrate Mode.
 
 Propose fixes; apply only the ones the human approves.
 
@@ -52,7 +52,7 @@ v1 kept the workflow state in labels. Map each open issue carrying them and show
 | `llm-review` | In Review |
 | `in-use` + claim block | removed; the assignee is the claim |
 | `nontechnical-intake` | removed; post a `<!-- linear-ai:intake-nontech -->` comment |
-| `sp-*` | removed |
+| `sp-*`, `ai-stage:*` | removed |
 
 - The newest v1 plan comment's content moves into the description's template sections when the issue goes
   to Todo; if that is not possible mechanically, the issue goes to Backlog for `linear-refine`.

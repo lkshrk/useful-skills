@@ -15,8 +15,7 @@ isolated worktree. Never run two agents on the same issue.
 ## 1. Claim
 
 1. Read the issue. If it is In Progress and was updated by someone else within the stale threshold, stop
-   and report it as claimed. If it belongs to nightshift (`docs/workflow.md` → Nightshift coexistence),
-   stop.
+   and report it as claimed. If it is delegated to dsh (`docs/workflow.md` → dsh coexistence), stop.
 2. Save the description to a file and run `scripts/validate_issue.ts <file>` (add `--require-design` when
    the project uses design documents). If it fails, move the issue to Backlog with the problems as a
    comment and recommend `linear-refine`.

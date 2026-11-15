@@ -1,9 +1,8 @@
 # Workflow
 
 Linear AI uses Linear's own fields as the workflow state. There are no workflow state labels, no claim
-labels and no plan or dashboard comment formats. The rules below are the same state model as nightshift's
-(nightshift's Linear state spec), so manual sessions and nightshift can work the same
-workspace.
+labels and no plan or dashboard comment formats. Manual sessions share the workspace with the dsh harness,
+which works issues delegated to its Linear app.
 
 ## Ticket Reference Rule
 
@@ -15,15 +14,14 @@ description.
 An agent acts on an issue only when one of these holds:
 
 - the human names it (ID or link) in the session;
-- it is delegated or assigned to the AI app user;
-- it carries the opt-in label (default `autopilot`; a workspace may use another name).
+- it is delegated or assigned to the AI app user.
 
-Batch skills discover work only through the last two. Without a team and project already clear from the
+Batch skills discover work only through the second. Without a team and project already clear from the
 session, a skill asks which team and project to handle before discovering issues.
 
-**Nightshift coexistence:** if nightshift runs on the workspace, an issue in In Progress that is delegated
-to nightshift or carries its opt-in label belongs to nightshift. Do not change its status or `ai-*`
-labels; to take over, remove the opt-in first.
+**dsh coexistence:** an issue delegated to the dsh app belongs to dsh, which claims it, opens and answers
+its PR and closes it. Do not change its status, description or labels; to take over, ask the human to
+undelegate it first.
 
 ## State
 
@@ -74,8 +72,7 @@ description.
 
 - Type labels (`bug`, `feature`, or the workspace's Type group) classify the issue; they do not drive the
   workflow.
-- `ai-stage:<stage>` is optional. Set it only when the issue is meant to continue in nightshift later
-  (e.g. `ai-stage:implementation` for a refined task).
+- `hard` (dsh): the dsh worker plans the issue on its strongest model. Set it before delegating.
 - `Repo` group (`repo:<name>`): which repository an issue changes, required when its project maps to
   several repositories.
 - `ai-merge` (project label group): the project's merge mode, `manual`, `auto` or `feature-branch`.
@@ -110,8 +107,9 @@ One comment per milestone, each ending with a hidden marker so a rerun does not 
 
 - An issue too large for one worktree session is split into child issues; each child gets its own valid
   description. The parent stays as the container and is Done when all children are.
-- Larger features use a Linear project (or a parent issue in workspaces without projects); the old `EPIC`
-  label is not used.
+- Larger features use a Linear project (or a parent issue in workspaces without projects). The `epic`
+  label belongs to the dsh harness: an `epic` issue delegated to dsh without sub-issues gets split into
+  sub-issues there, so do not add or remove it in this workflow.
 
 ## Repository Boundaries
 
