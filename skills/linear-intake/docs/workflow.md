@@ -76,6 +76,7 @@ description.
 - `Repo` group (`repo:<name>`): which repository an issue changes, required when its project maps to
   several repositories.
 - `ai-merge` (project label group): the project's merge mode, `manual`, `auto` or `feature-branch`.
+- `epic` (dsh): marks an epic; see Splitting And Parents for when to set it.
 - No other workflow labels.
 
 ## Comments
@@ -105,11 +106,21 @@ One comment per milestone, each ending with a hidden marker so a rerun does not 
 
 ## Splitting And Parents
 
-- An issue too large for one worktree session is split into child issues; each child gets its own valid
-  description. The parent stays as the container and is Done when all children are.
-- Larger features use a Linear project (or a parent issue in workspaces without projects). The `epic`
-  label belongs to the dsh harness: an `epic` issue delegated to dsh without sub-issues gets split into
-  sub-issues there, so do not add or remove it in this workflow.
+- An issue too large for one worktree session is split into sub-issues; each sub-issue gets its own valid
+  description. The parent stays as the container and is Done when all sub-issues are.
+- Three shapes, never more than three levels: a single issue; an **epic** (one shippable piece, 2 to 8
+  sub-issues); an **umbrella** issue above several epics. Only leaf issues are implemented; epics and
+  umbrellas stay in Backlog and are not in the agent format.
+- `blocked by` between sub-issues stays inside one epic: dsh stalls a chain on a blocker outside it. Order
+  between pieces is carried by `blocked by` between the epics. Work that waits on something no agent in the
+  repository does (an owner-run step, another repository, deployed configuration) is its own issue outside
+  the epics, related to the umbrella.
+- A larger feature stays in the product's project as an umbrella issue, so it keeps the project's
+  milestones and its repository mapping. Give it a Linear project of its own only when it needs its own
+  merge mode (`ai-merge: feature-branch`).
+- `epic` label: put it on an epic once its sub-issues exist. On an issue without sub-issues it tells dsh
+  to do the split itself when the issue is delegated, so add it there only on purpose. An umbrella never
+  carries it.
 
 ## Repository Boundaries
 

@@ -18,8 +18,9 @@ implementation; that is `linear-refine`.
    other fitting labels from that live data; ask whether to add more before saving.
 3. When the project spans several repositories, set the `repo:<name>` label for the one the issue changes;
    ask if it is unclear.
-4. Add `hard` only when the human wants dsh to plan the issue on its strongest model, and `EPIC` only when
-   dsh should split it into sub-issues.
+4. Add `hard` only when the human wants dsh to plan the issue on its strongest model. Add `epic` to an
+   issue without sub-issues only when dsh should split it; an epic that already has sub-issues carries it
+   (`docs/workflow.md` → Splitting And Parents).
 
 ## Technical Mode (default)
 
