@@ -1,0 +1,24 @@
+interface:
+  display_name: "dsh Supervise"
+  short_description: "Stand in for the owner: delegate issues to dsh, review, merge, verify, report."
+  default_prompt: "Use $dsh-supervise to supervise dsh workers on these Linear issues in my place."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "linear"
+      description: "Linear MCP server for issue reads and writes, delegation and session thread comments."
+    - type: "shell"
+      value: "gh"
+      description: "GitHub CLI for PR state, checks and pinned squash merges."
+    - type: "shell"
+      value: "git"
+      description: "Git CLI for reviewer worktrees and comparing a rebased head with the reviewed commit."
+    - type: "shell"
+      value: "kubectl"
+      description: "Read-only checks of workers and rollouts, where the project runs on Kubernetes."
+    - type: "shell"
+      value: "docker"
+      description: "CI-like test runner for reviewers."
+policy:
+  # Stays false: this skill merges and delegates, so it runs only when the user asks for it by name.
+  allow_implicit_invocation: false

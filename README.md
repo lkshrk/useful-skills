@@ -15,6 +15,7 @@ A collection of useful agent skills, packaged as a Codex / Claude Code plugin.
 | Skill | Purpose |
 | --- | --- |
 | `ai-context-generator` | Generate a tiered `.ai-context` knowledge base for coding agents. |
+| `dsh-supervise` | Stand in for the owner as supervisor of dsh workers: plan in waves, delegate Linear issues, review and merge their PRs, verify deployments, report. |
 | `linear-*` | Linear issue workflow: `linear-intake`, `linear-refine`, `linear-implement`, `linear-status`, `linear-reconcile`. See [docs/workflow.md](docs/workflow.md). |
 | `litho-document-skill` | Generate C4 architecture docs for a codebase. |
 | `loc-change-table` | Line-change stats per repo and file category since a date. |
