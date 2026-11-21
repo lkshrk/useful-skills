@@ -13,6 +13,7 @@ Warcraft helper. Ask in plain language — no commands or coding needed.
 | `wow-achievement-plan` | A personal achievement or progression checklist: quests, reputation, professions and items, with realistic times and eligible characters. | "Plan my TBC Anniversary reputation grind." |
 | `wow-achievement-dashboard` | An overview of your plan: next actions, progress and routes, with static checklists for non-achievement goals. | "Make a dashboard for my achievement plan." |
 | `wow-duo-world-tour` | A shared achievement or progression route for you and a friend, showing who gets credit for what. | "Plan a 2-hour quest and profession tour for us." |
+| `wow-forever-writs` | WoW Forever only: the cheapest Craftsman's Writs of a tier, or the best Merchant's Favor reputation per gold, from your Auctionator scan. | "Check the writs." |
 
 ## Install
 
@@ -38,7 +39,7 @@ To update, download and upload again.
 ### Claude Code, Codex
 
 ```sh
-npx skills add lkshrk/useful-skills --skill wow-help wow-spec wow-account-setup wow-achievement-plan wow-achievement-dashboard wow-duo-world-tour
+npx skills add lkshrk/useful-skills --skill wow-help wow-spec wow-account-setup wow-achievement-plan wow-achievement-dashboard wow-duo-world-tour wow-forever-writs
 ```
 
 ## Getting started
@@ -97,6 +98,17 @@ $wow-duo-world-tour Using our configured Retail accounts, plan a two-hour Pandar
 $wow-duo-world-tour Plan a 90-minute quest and profession route for our two TBC Anniversary characters. Check that we can group and save a shared Markdown checklist.
 ```
 
+### Forever writs (`wow-forever-writs`)
+
+Needs the [Auctionator](https://www.curseforge.com/wow/addons/auctionator) addon: scan the
+Forever auction house, then `/reload` so the prices are saved.
+
+```text
+$wow-forever-writs Check the writs.
+$wow-forever-writs Show the 5 cheapest expert writs.
+$wow-forever-writs Which writs give the most Merchant's Favor reputation per gold?
+```
+
 ## Good to know
 
 - **Game versions:** use Retail, a specific Classic variant, or Forever. If the
@@ -107,6 +119,8 @@ $wow-duo-world-tour Plan a 90-minute quest and profession route for our two TBC 
   build/season-refresh helpers remain Retail-specific. The achievement views
   support Retail and MoP Classic live data. Other contexts and progression goals
   use ordinary Markdown plans; addon/API compatibility is checked before import.
+  The writ-price helper (`wow-forever-writs`) is WoW Forever only and reads the
+  account-wide `Auctionator.lua` saved file.
 - **Output:** plans are saved as simple checklist files you can open anywhere.
   If you use [Obsidian](https://obsidian.md) (a notes app), they can go there instead.
 - **Waypoints:** routes come as commands for the [TomTom](https://www.curseforge.com/wow/addons/tomtom)

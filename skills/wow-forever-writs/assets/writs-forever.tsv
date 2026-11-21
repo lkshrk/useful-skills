@@ -1,0 +1,155 @@
+# WoW Forever Craftsman's Writs. IDs and names: QuestieDB Forever 1.1.3. Tier: quest reputation reward (75/125/200).
+# Profession and skill: theforeverera.com/en/merchants-favor. qty is assumed 1 (not in client data); correct rows by hand.
+# Turn-in NPC and coordinates: QuestieDB Forever 1.1.3; zone names: AreaTable of build 1.60.1.71037. Empty = not recorded yet.
+# Turn-ins added by hand from Wowhead player comments (Nov 2026): quests 94291, 94326, 94327, 94336, 94351, 94354, 94356, 94360. Quest 94276: QuestieDB master (2026-11-21) lists Mukomonji as finisher. Quest 94352: Wowhead item comment, tower reached via Sanath Lim-Yo's teleport (Azshara 28.1, 50.1).
+tier	profession	skill	writ_id	writ	quest_id	item_id	item	qty	rep	turnin_npc	turnin_zone	turnin_x	turnin_y
+journeyman	Alchemy	120	264019	Draught of Water Breathing	94219	5996	Elixir of Water Breathing	1	75	Kixxle	Wetlands	50.2	37.74
+journeyman	Alchemy	120	264012	Elixir of Wisdom	94212	3383	Elixir of Wisdom	1	75	Muggol Breezebeard	Arathi Highlands	48.68	55.78
+journeyman	Alchemy	135	264014	Shadow Protection Potion	94214	6048	Shadow Protection Potion	1	75	Kzixx	Duskwood	81.82	19.77
+journeyman	Alchemy	140	264016	Elixir of Lesser Agility	94216	3390	Elixir of Lesser Agility	1	75	Ziz Fizziks	Stonetalon Mountains	58.99	62.6
+journeyman	Alchemy	145	264013	Lesser Mana Potion	94213	3385	Lesser Mana Potion	1	75	Ash'alari	Ashenvale	60.24	72.66
+journeyman	Alchemy	150	264011	Elixir of Ogre's Strength	94004	3391	Elixir of Ogre's Strength	1	75	Sos'mol	Alterac Mountains	38.4	61.13
+journeyman	Alchemy	150	264015	Free Action Potion	94215	5634	Free Action Potion	1	75	Webbed Mudsnout Gnoll	Hillsbrad Foothills	62.4	69.23
+journeyman	Alchemy	150	264017	Lesser Troll's Blood Elixir	94217	3388	Strong Troll's Blood Potion	1	75	Short John Mithril	Stranglethorn Vale	29.59	47.38
+journeyman	Alchemy	215	264018	Elixir of Defense	94218	8951	Elixir of Greater Defense	1	75	Rizzle Brassbolts	Thousand Needles	77.22	77.4
+journeyman	Blacksmithing	75	264023	Silver Skeleton Key	94223	15869	Silver Skeleton Key	1	75		Duskwood		
+journeyman	Blacksmithing	95	264025	Rough Bronze Leggings	94225	2865	Rough Bronze Leggings	1	75	Ziz Fizziks	Stonetalon Mountains	58.99	62.6
+journeyman	Blacksmithing	110	264027	Big Bronze Knife	94227	3848	Big Bronze Knife	1	75	"Plucky" Johnson	Thousand Needles	79.61	75.63
+journeyman	Blacksmithing	115	264022	Iridescent Hammer	94222	5541	Iridescent Hammer	1	75	Cowardly Peon	Ashenvale	78.47	68.89
+journeyman	Blacksmithing	115	264020	Pearl-Handled Dagger	94220	5540	Pearl-handled Dagger	1	75	Alan Sneeks	Alterac Mountains	30.62	61.02
+journeyman	Blacksmithing	120	264028	Green Iron Boots	94228	3484	Green Iron Boots	1	75	Kixxle	Wetlands	50.2	37.74
+journeyman	Blacksmithing	125	264026	Green Iron Gauntlets	94226	3485	Green Iron Gauntlets	1	75	"Sea Wolf" MacKinley	Stranglethorn Vale	27.78	77.07
+journeyman	Blacksmithing	130	264021	Golden Rod	94221	11128	Golden Rod	1	75	Muggol Breezebeard	Arathi Highlands	48.68	55.78
+journeyman	Blacksmithing	135	264024	Heavy Bronze Mace	94224	3491	Heavy Bronze Mace	1	75	Gorgrash	Hillsbrad Foothills	80.02	48.47
+journeyman	Engineering	115	264033	Practice Lock	94233	6712	Practice Lock	1	75	Gorgrash	Hillsbrad Foothills	80.02	48.47
+journeyman	Engineering	120	264034	Shadow Goggles	94234	4373	Shadow Goggles	1	75	Ziz Fizziks	Stonetalon Mountains	58.99	62.6
+journeyman	Engineering	125	264037	Crafted Solid Shot	94237	8069	Crafted Solid Shot	1	75	Kixxle	Wetlands	50.2	37.74
+journeyman	Engineering	125	264035	Gnomish Universal Remote	94235	7506	Gnomish Universal Remote	1	75	Scooty	Stranglethorn Vale	27.6	77.48
+journeyman	Engineering	140	264036	Big Bronze Bomb	94236	4380	Big Bronze Bomb	1	75	Razzeric	Thousand Needles	80.33	76.09
+journeyman	Engineering	140	264032	Minor Recombobulator	94232	4381	Minor Recombobulator	1	75	Kzixx	Duskwood	81.82	19.77
+journeyman	Engineering	145	264031	Moonsight Rifle	94231	4383	Moonsight Rifle	1	75	Grembly	Ashenvale	82.13	50.99
+journeyman	Engineering	160	264029	Ornate Spyglass	94229	5507	Ornate Spyglass	1	75	Alan Sneeks	Alterac Mountains	30.62	61.02
+journeyman	Engineering	175	264030	Explosive Sheep	94230	4384	Explosive Sheep	1	75	Alyce	Arathi Highlands	33.98	23.32
+journeyman	Leatherworking	75	264041	Dark Leather Tunic	94241	2317	Dark Leather Tunic	1	75	Kzixx	Duskwood	81.82	19.77
+journeyman	Leatherworking	80	264039	Fine Leather Pants	94239	5958	Fine Leather Pants	1	75	Alyce	Arathi Highlands	33.98	23.32
+journeyman	Leatherworking	95	264046	Red Whelp Gloves	94246	7284	Red Whelp Gloves	1	75	Kixxle	Wetlands	50.2	37.74
+journeyman	Leatherworking	110	264040	Herbalist's Gloves	94240	7349	Herbalist's Gloves	1	75	Murache	Ashenvale	64.77	80.15
+journeyman	Leatherworking	115	264044	Dark Leather Shoulders	94244	4252	Dark Leather Shoulders	1	75	Narkk	Stranglethorn Vale	28.13	74.42
+journeyman	Leatherworking	115	264042	Pilferer's Gloves	94242	7358	Pilferer's Gloves	1	75	Kris Legace	Hillsbrad Foothills	80.14	38.89
+journeyman	Leatherworking	125	264045	Barbaric Gloves	94245	4254	Barbaric Gloves	1	75	Goblin Pit Boss	Thousand Needles	79.9	76.74
+journeyman	Leatherworking	125	264038	Heavy Leather Ball	94238	18662	Heavy Leather Ball	1	75	Sos'mol	Alterac Mountains	38.4	61.13
+journeyman	Leatherworking	145	264043	Heavy Quiver	94243	7371	Heavy Quiver	1	75	Ziz Fizziks	Stonetalon Mountains	58.99	62.6
+journeyman	Tailoring	70	264053	Colorful Kilt	94253	10048	Colorful Kilt	1	75	Hekshi	Stranglethorn Vale	50.66	19.26
+journeyman	Tailoring	75	264048	Blue Overalls	94248	6263	Blue Overalls	1	75	Alyce	Arathi Highlands	33.98	23.32
+journeyman	Tailoring	75	264052	Red Woolen Boots	94252	4313	Red Woolen Boots	1	75	Ziz Fizziks	Stonetalon Mountains	58.99	62.6
+journeyman	Tailoring	90	264054	Greater Adept's Robe	94254	6264	Greater Adept's Robe	1	75	Magus Tirth	Thousand Needles	78.29	75.7
+journeyman	Tailoring	100	264051	Phoenix Pants	94251	4317	Phoenix Pants	1	75	Bath'rah the Windwatcher	Alterac Mountains	80.5	66.92
+journeyman	Tailoring	115	264055	Spider Silk Slippers	94255	4321	Spider Silk Slippers	1	75	Kixxle	Wetlands	50.2	37.74
+journeyman	Tailoring	130	264049	Azure Silk Hood	94249	7048	Azure Silk Hood	1	75	Cowardly Peon	Ashenvale	78.47	68.89
+journeyman	Tailoring	130	264047	Lesser Wizard's Robe	94247	5766	Lesser Wizard's Robe	1	75	Alan Sneeks	Alterac Mountains	30.62	61.02
+journeyman	Tailoring	145	264050	Small Silk Pack	94250	4245	Small Silk Pack	1	75	Kzixx	Duskwood	81.82	19.77
+expert	Alchemy	165	264063	Fire Protection Potion	94263	6049	Fire Protection Potion	1	125	Durganon	Searing Gorge	41.06	58.29
+expert	Alchemy	165	264064	Shadow Oil	94264	3824	Shadow Oil	1	125	Mukomonji	Swamp of Sorrows	62.39	52.85
+expert	Alchemy	175	264061	Great Rage Potion	94261	5633	Great Rage Potion	1	125	Dendrite Starblaze	Moonglade	56.21	30.64
+expert	Alchemy	180	264062	Mana Potion	94262	3827	Mana Potion	1	125	Spek	Riverglades	76.91	54.07
+expert	Alchemy	185	264057	Lesser Invisibility Potion	94257	3823	Lesser Invisibility Potion	1	125	Centaur Pariah	Desolace	50.42	86.65
+expert	Alchemy	190	264056	Frost Protection Potion	94256	6050	Frost Protection Potion	1	125	Lotwil Veriatus	Badlands	25.95	44.87
+expert	Alchemy	190	264059	Nature Protection Potion	94259	6052	Nature Protection Potion	1	125	Greta Mosshoof	Felwood	51.21	82.11
+expert	Alchemy	205	264066	Elixir of Agility	94266	8949	Elixir of Agility	1	125	Juo	The Hinterlands	80.13	55.39
+expert	Alchemy	210	264065	Goblin Rocket Fuel	94265	9061	Goblin Rocket Fuel	1	125	Alchemist Pestlezugg	Tanaris	50.89	26.96
+expert	Alchemy	215	264058	Lesser Stoneshield Potion	94258	4623	Lesser Stoneshield Potion	1	125	Mudcrush Durtfeet	Dustwallow Marsh	35.15	38.26
+expert	Alchemy	220	264060	Catseye Draught	94260	10592	Catseye Elixir	1	125	Scout Raroul	Feralas	72.41	52.47
+expert	Alchemy	225	264067	Wildvine Potion	94267	9144	Wildvine Potion	1	125	Spark Nilminer	Un'Goro Crater	43.5	7.42
+expert	Blacksmithing	155	264073	Moonsteel Broadsword	94273	3853	Moonsteel Broadsword	1	125	Meliri	Moonglade	51.18	42.31
+expert	Blacksmithing	165	264074	Golden Scale Coif	94274	3837	Golden Scale Coif	1	125	Spek	Riverglades	76.91	54.07
+expert	Blacksmithing	165	264070	Steel Weapon Chain	94270	6041	Steel Weapon Chain	1	125	Ugbert	Dustwallow Marsh	40.99	27.88
+expert	Blacksmithing	175	264075	Solid Sharpening Stone	94275	7964	Solid Sharpening Stone	1	125	Master Smith Burninate	Searing Gorge	38.8	28.51
+expert	Blacksmithing	180	264078	Golden Scale Gauntlets	94278	9366	Golden Scale Gauntlets	1	125	Gilveradin Sunchaser	The Hinterlands	26.71	48.59
+expert	Blacksmithing	180	264077	Truesilver Rod	94277	11144	Truesilver Rod	1	125	Spigot Operator Luglunket	Tanaris	52.49	28.45
+expert	Blacksmithing	195	264072	Blue Glittering Axe	94272	7942	Blue Glittering Axe	1	125	Scout Raroul	Feralas	72.41	52.47
+expert	Blacksmithing	200	264069	Inlaid Mithril Cylinder	94269	9060	Inlaid Mithril Cylinder	1	125	Bibbly F'utzbuckle	Desolace	62.33	38.99
+expert	Blacksmithing	200	264071	Ornate Mithril Shoulders	94271	7928	Ornate Mithril Shoulder	1	125	Taronn Redfeather	Felwood	50.89	81.62
+expert	Blacksmithing	200	264076	Wicked Mithril Blade	94276	7943	Wicked Mithril Blade	1	125	Mukomonji	Swamp of Sorrows	62.39	52.85
+expert	Blacksmithing	210	264079	Heavy Mithril Axe	94279	7941	Heavy Mithril Axe	1	125	Torwa Pathfinder	Un'Goro Crater	71.64	75.96
+expert	Blacksmithing	210	264068	Steel Plate Helm	94268	7922	Steel Plate Helm	1	125	Furious Shadowforge Digger	Badlands	44.29	11.42
+expert	Engineering	175	264089	Gyromatic Micro-Adjuster	94289	10498	Gyromatic Micro-Adjustor	1	125	Jhordy Lapforge	Tanaris	52.3	26.89
+expert	Engineering	185	264081	Advanced Target Dummy	94281	4392	Advanced Target Dummy	1	125	Bibbly F'utzbuckle	Desolace	62.33	38.99
+expert	Engineering	185	264082	Craftsman's Monocle	94282	4393	Craftsman's Monocle	1	125	The Ravenous	Dustwallow Marsh	54	56.48
+expert	Engineering	185	264086	Flash Bomb	94286	4852	Flash Bomb	1	125	Spek	Riverglades	76.91	54.07
+expert	Engineering	195	264083	Goblin Land Mine	94283	4395	Goblin Land Mine	1	125	Jessir Moonbow	Felwood	51.35	82.01
+expert	Engineering	200	264080	Mechanical Dragonling	94280	4396	Mechanical Dragonling	1	125	Garyanne Fleezlebop	Badlands	67.69	51.7
+expert	Engineering	200	264090	Mechanical Repair Kit	94290	11590	Mechanical Repair Kit	1	125	Rhapsody Shindigger	The Hinterlands	26.94	48.59
+expert	Engineering	200	264085	Unstable Trigger	94285	10560	Unstable Trigger	1	125	Narianna	Moonglade	53.34	42.7
+expert	Engineering	215	264088	Mithril Frag Bomb	94288	10514	Mithril Frag Bomb	1	125	Bullets Bigblast	Swamp of Sorrows	69.98	41.6
+expert	Engineering	220	264084	Catseye Ultra Goggles	94284	10501	Catseye Ultra Goggles	1	125	Scout Raroul	Feralas	72.41	52.47
+expert	Engineering	225	264087	Fire Goggles	94287	10500	Fire Goggles	1	125	Durganon	Searing Gorge	41.06	58.29
+expert	Engineering	285	264091	Dark Iron Bomb	94291	16005	Dark Iron Bomb	1	125		Un'Goro Crater		
+expert	Leatherworking	160	264093	Guardian Cloak	94293	5965	Guardian Cloak	1	125	Azore Aldamort	Desolace	38.88	27.16
+expert	Leatherworking	175	264092	Comfortable Leather Hat	94292	8174	Comfortable Leather Hat	1	125	Garek	Badlands	61.94	54.26
+expert	Leatherworking	175	264098	Swift Boots	94298	7391	Swift Boots	1	125	Spek	Riverglades	76.91	54.07
+expert	Leatherworking	180	264094	Dusky Bracers	94294	7378	Dusky Bracers	1	125	The Ravenous	Dustwallow Marsh	54	56.48
+expert	Leatherworking	185	264099	Nightscape Shoulders	94299	8192	Nightscape Shoulders	1	125	Evonice Sootsmoker	Searing Gorge	38.35	27.74
+expert	Leatherworking	190	264101	Big Voodoo Robe	94301	8200	Big Voodoo Robe	1	125	Yeh'kinya	Tanaris	66.99	22.36
+expert	Leatherworking	195	264100	Big Voodoo Mask	94300	8201	Big Voodoo Mask	1	125	Mukomonji	Swamp of Sorrows	62.39	52.85
+expert	Leatherworking	195	264096	Wild Leather Shoulders	94296	8210	Wild Leather Shoulders	1	125	Scout Raroul	Feralas	72.41	52.47
+expert	Leatherworking	200	264095	Wild Leather Helmet	94295	8214	Wild Leather Helmet	1	125	Ivy Leafrunner	Felwood	50.96	81.58
+expert	Leatherworking	205	264102	Turtle Scale Breastplate	94302	8189	Turtle Scale Breastplate	1	125	Juo	The Hinterlands	80.13	55.39
+expert	Leatherworking	220	264097	Quickdraw Quiver	94297	8217	Quickdraw Quiver	1	125	Narianna	Moonglade	53.34	42.7
+expert	Leatherworking	220	264103	Thick Leather Ammo Pouch	94303	8218	Thick Leather Ammo Pouch	1	125	Nergal	Un'Goro Crater	43.27	7.73
+expert	Tailoring	160	264115	Earthen Silk Belt	94315	7061	Earthen Silk Belt	1	125	Petra Grossen	Un'Goro Crater	43.7	7.24
+expert	Tailoring	165	264109	Star Belt	94309	4329	Star Belt	1	125	Mylentha Riverbend	Moonglade	51.77	32.58
+expert	Tailoring	170	264106	Crimson Silk Robe	94306	7063	Crimson Silk Robe	1	125	Tabetha	Dustwallow Marsh	46.06	57.09
+expert	Tailoring	180	264111	Red Mageweave Pants	94311	10009	Red Mageweave Pants	1	125	Lookout Captain Lolo Longstriker	Searing Gorge	37.74	26.56
+expert	Tailoring	180	264113	White Bandit Mask	94313	10008	White Bandit Mask	1	125	Vizzklick	Tanaris	51.01	27.36
+expert	Tailoring	185	264110	Black Mageweave Vest	94310	9998	Black Mageweave Vest	1	125	Spek	Riverglades	76.91	54.07
+expert	Tailoring	185	264112	Orange Martial Shirt	94312	10052	Orange Martial Shirt	1	125	Bullets Bigblast	Swamp of Sorrows	69.98	41.6
+expert	Tailoring	190	264108	Enchanted Mageweave Pouch	94308	22246	Enchanted Mageweave Pouch	1	125	Impsy	Felwood	41.36	45.02
+expert	Tailoring	195	264107	Shadoweave Robe	94307	10004	Shadoweave Robe	1	125	Eridan Bluewind	Felwood	51.35	81.51
+expert	Tailoring	205	264114	Cindercloth Robe	94314	10042	Cindercloth Robe	1	125	Atal'ai Exile	The Hinterlands	33.75	75.21
+expert	Tailoring	205	264104	Mageweave Bag	94304	10050	Mageweave Bag	1	125	Rigglefuzz	Badlands	42.39	52.93
+expert	Tailoring	205	264105	Shadoweave Gloves	94305	10023	Shadoweave Gloves	1	125	Willow	Desolace	62.2	39.63
+artisan	Alchemy	240	264120	Gift of Arthas	94320	9088	Gift of Arthas	1	200	Adon	Eastern Plaguelands	50.92	11.48
+artisan	Alchemy	245	264117	Dreamless Sleep Potion	94317	12190	Dreamless Sleep Potion	1	200	Kum'isha the Collector	Blasted Lands	51.98	35.65
+artisan	Alchemy	250	264124	Distilled Firewater	94324	246948	Distilled Firewater	1	200	Bor'dorc	Winterspring	64.84	33.27
+artisan	Alchemy	250	264122	Limited Invulnerability Potion	94322	3387	Limited Invulnerability Potion	1	200	Jarund Stoutstrider	Silithus	82.05	18.08
+artisan	Alchemy	250	264116	Potion of Demonslaying	94316	9224	Elixir of Demonslaying	1	200	Archmage Xylem	Azshara	29.25	40.21
+artisan	Alchemy	265	264119	Draught of Detect Demon	94319	9233	Elixir of Detect Demon	1	200	Hastings	Deadwind Pass	46.99	75.32
+artisan	Alchemy	290	264118	Greater Fire Protection Potion	94318	13457	Greater Fire Protection Potion	1	200	Gorzeeki Wildeyes	Burning Steppes	12.44	31.63
+artisan	Alchemy	300	264121	Flask of Chromatic Resistance	94321	13513	Flask of Chromatic Resistance	1	200				
+artisan	Alchemy	300	264123	Major Rejuvenation Potion	94323	18253	Major Rejuvenation Potion	1	200	Kirala Fairgrass	Western Plaguelands	59.57	53.15
+artisan	Blacksmithing	210	264128	Mithril Spurs	94328	7969	Mithril Spurs	1	200	Calliard	Deadwind Pass	48.35	68.72
+artisan	Blacksmithing	230	264133	Ebon Shiv	94333	7947	Ebon Shiv	1	200				
+artisan	Blacksmithing	230	264127	Orcish War Leggings	94327	7929	Orcish War Leggings	1	200	Ugkragg	Burning Steppes	38.4	35.4
+artisan	Blacksmithing	235	264126	Radiant Belt	94326	12416	Radiant Belt	1	200	Kum'isha the Collector	Blasted Lands	52.0	35.0
+artisan	Blacksmithing	250	264132	Arcanite Skeleton Key	94332	15872	Arcanite Skeleton Key	1	200				
+artisan	Blacksmithing	255	264131	Huge Thorium Battleaxe	94331	12775	Huge Thorium Battleaxe	1	200				
+artisan	Blacksmithing	270	264125	Radiant Circlet	94325	12417	Radiant Circlet	1	200				
+artisan	Blacksmithing	275	264129	Imperial Plate Chest	94329	12422	Imperial Plate Chest	1	200				
+artisan	Blacksmithing	300	264130	Darkrune Gauntlets	94330	20549	Darkrune Gauntlets	1	200				
+artisan	Engineering	240	264141	Sniper Scope	94341	10548	Sniper Scope	1	200	Suspicious Adventurer	Western Plaguelands	65.74	76.1
+artisan	Engineering	260	264140	Truesilver Transformer	94340	18631	Truesilver Transformer	1	200	Khur Hornstriker	Silithus	48.67	37
+artisan	Engineering	265	264137	Gnomish Alarm-O-Bot	94337	18645	Alarm-O-Bot	1	200				
+artisan	Engineering	265	264138	Goblin Jumper Cables XL	94338	18587	Goblin Jumper Cables XL	1	200				
+artisan	Engineering	265	264135	Green Lens	94335	10504	Green Lens	1	200	Kum'isha the Collector	Blasted Lands	51.98	35.65
+artisan	Engineering	265	264136	Lifelike Mechanical Toad	94336	15996	Lifelike Mechanical Toad	1	200	Ugkragg	Burning Steppes	38.4	35.4
+artisan	Engineering	275	264134	Masterwork Target Dummy	94334	16023	Masterwork Target Dummy	1	200				
+artisan	Engineering	300	264139	Field Repair Bot 74A	94339	18232	Field Repair Bot 74A	1	200				
+artisan	Engineering	320	264142	Tranquil Mechanical Yeti	94342	21277	Tranquil Mechanical Yeti	1	200				
+artisan	Leatherworking	240	264147	Wicked Leather Bracers	94347	15084	Wicked Leather Bracers	1	200	Quartermaster Miranda Breechlock	Eastern Plaguelands	71.79	50.25
+artisan	Leatherworking	250	264151	Frostsaber Boots	94351	15071	Frostsaber Boots	1	200		Winterspring		
+artisan	Leatherworking	250	264150	Runic Leather Bracers	94350	15092	Runic Leather Bracers	1	200	Fallen Adventurer	Western Plaguelands	38.2	72.41
+artisan	Leatherworking	260	264145	Volcanic Breastplate	94345	15053	Volcanic Breastplate	1	200				
+artisan	Leatherworking	265	264148	Chimeric Vest	94348	15075	Chimeric Vest	1	200				
+artisan	Leatherworking	265	264146	Runic Leather Headband	94346	15094	Runic Leather Headband	1	200	Hastings	Deadwind Pass	46.99	75.32
+artisan	Leatherworking	265	264143	Wicked Leather Pants	94343	15087	Wicked Leather Pants	1	200				
+artisan	Leatherworking	270	264149	Heavy Scorpid Helm	94349	15080	Heavy Scorpid Helm	1	200				
+artisan	Tailoring	140	264155	Tuxedo Jacket	94355	10036	Tuxedo Jacket	1	200	Hastings	Deadwind Pass	46.99	75.32
+artisan	Tailoring	200	264158	Shadoweave Mask	94358	10025	Shadoweave Mask	1	200	Hermit Ortell	Silithus	67.19	69.76
+artisan	Tailoring	215	264153	Runecloth Bag	94353	14046	Runecloth Bag	1	200	Kum'isha the Collector	Blasted Lands	51.98	35.65
+artisan	Tailoring	215	264160	Soul Pouch	94360	21340	Soul Pouch	1	200		Winterspring		
+artisan	Tailoring	225	264159	Ghostweave Vest	94359	14141	Ghostweave Vest	1	200				
+artisan	Tailoring	230	264157	Cenarion Herb Bag	94357	22251	Cenarion Herb Bag	1	200				
+artisan	Tailoring	235	264154	Runecloth Boots	94354	13864	Runecloth Boots	1	200	Gorzeeki Wildeyes	Burning Steppes	12.6	31.8
+artisan	Tailoring	240	264156	Felcloth Boots	94356	14108	Felcloth Boots	1	200	Egan	Eastern Plaguelands	11.4	26.6
+artisan	Tailoring	260	264152	Wizardweave Turban	94352	14130	Wizardweave Turban	1	200		Azshara		
+artisan	Tailoring	285	264144	Gordok Ogre Suit	94344	18258	Gordok Ogre Suit	1	200				
