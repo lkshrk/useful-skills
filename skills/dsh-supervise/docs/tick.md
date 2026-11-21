@@ -7,14 +7,19 @@ and a new session creates it again. Without a scheduler, run the same steps by h
 Fill the placeholders and use this as the prompt:
 
 ```text
-Supervision tick for <goal> (plan: <path to the plan>). Do not stop the work; check and act:
-1. Workers: for every issue delegated to dsh that is not Done, read its Linear status and its session
-   thread, its branch and pull request, and the workers in <worker namespace> (read-only). A worker counts
-   as stuck when it shows no new thread activity, commit or PR update for 30 minutes, asks a question, or
+Supervision tick for <goal> (plan: <path to the plan>). Do not stop the work; check and act. The Linear
+credential may be shared and is rate-limited per hour: at most one Linear read per open issue per tick,
+and none when the PR and the control-plane log already answer the question.
+1. Workers: for every issue delegated to dsh that is not Done, read its branch and pull request, and its
+   liveness from the dsh control plane (read-only): `kubectl -n <dsh namespace> logs deploy/<control
+   plane> --since=30m --timestamps | grep <ticket hash>`, the hash being the 12-character suffix of the
+   worker's branch name. Read the session thread (small limit) only when the PR changed, a hand-back is
+   due, or that log is silent. A worker counts as stuck only when the control plane shows no activity for
+   its ticket for 30 minutes AND there is no new commit or thread reply, or when it asks a question or
    reports a blocker. Answer the question in the session thread from the plan and the issue; if the
-   answer is an owner decision, ask the owner in this session. Re-delegate only when the worker is gone
-   and the thread is silent (say so in the thread, clear the delegate, set it again); otherwise ask in
-   the thread.
+   answer is an owner decision, ask the owner in this session. Re-delegate only after a reminder in the
+   thread was followed by continued silence in the log (say so in the thread, clear the delegate, set it
+   again).
 2. Pull requests from delegated issues: review any that was handed back and is not yet reviewed; send
    findings back through the thread. Merge a PR only if the plan records the owner's merge authority, the
    task is not marked as an owner gate, review passed, and CI is green on the approved head; otherwise
@@ -37,11 +42,34 @@ gh pr list --state open --json number,title,isDraft,statusCheckRollup,commits,me
 gh run list --branch main --limit 3 --json name,status,conclusion,headSha \
   --jq '.[] | "\(.headSha[0:8]) \(.name) \(.status) \(.conclusion)"'
 kubectl -n <app namespace> get pods --no-headers
-kubectl -n <worker namespace> get pods --no-headers
+kubectl -n <dsh namespace> logs deploy/<control plane> --since=30m --timestamps | grep -E '<ticket hash>|ready:'
 ```
 
 An empty `checks=` or a blank conclusion means CI is still running or never ran on that head. The PR list
-does not show a hand-back: read each issue's session thread as well.
+does not show a hand-back: read the issue's session thread when one is due.
+
+## Is the worker alive
+
+A working dsh session is invisible from Linear and GitHub until it hands back: no thread activity, no
+commit. Do not read that silence as a stall. The control plane says more:
+
+- It logs one line per session turn that names the ticket: `built the tools of <session> for Linear
+  ticket <hash>`. The hash is the 12-character suffix of the worker's branch name
+  (`agent/<slug>-<hash>`). Such a line inside the last 30 minutes means the worker is running.
+- The Linear source logs `ready: N sessions, N prompts`. A count of 1 prompt shortly after your thread
+  reply means dsh received it.
+- The worker pods come from a pool and do not map to issues; their age says nothing about one ticket.
+
+If you cannot read the control plane, ask the owner how to see running jobs before you treat silence as a
+stall. A worker is stuck only when the log shows no activity for its ticket for 30 minutes **and** there
+is no new commit or thread reply, or when it asks a question or reports a blocker. Re-delegate only after
+a reminder in the thread was followed by continued silence in the log.
+
+## Linear budget
+
+Linear allows 2500 requests per hour per credential, and other agents may share yours. Keep to about one
+Linear read per open issue per tick, read threads with a small limit, and never re-read a full issue
+description. When a write is refused with a rate-limit error it was not posted: wait and retry it.
 
 ## Waiting for one PR
 
@@ -74,3 +102,6 @@ fi
 | Every open PR conflicts after each merge | All PRs append to one shared file. Rebase one PR at a time, in merge order, and file an issue for the cause. |
 | The refined issue no longer validates | A section was appended to it. Read the repository's issue validator before adding structure to an issue. |
 | Reviewer worktrees pile up | Each review leaves one. Remove them when the PR is merged. |
+| A worker looks stalled: no push, no reply for half an hour | A working session gives no signal until it hands back. Check the control-plane log for its ticket hash before reminding or re-delegating. |
+| A Linear write fails with "rate limit exceeded" | The hourly budget is shared with other agents on the credential. Nothing was posted: wait, retry, and cut your reads. |
+| One thread read returns a very large response | A hand-back comment embeds many screenshots as signed URLs, each returned twice. Read threads with a small limit. |

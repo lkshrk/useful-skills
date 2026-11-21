@@ -19,8 +19,8 @@ Collect these from the owner or the repository's agent instructions; ask once fo
 - the Linear tools for setting an issue's delegate and for replying to a comment (a worker's session
   thread is the comment thread Linear opens on delegation; you reply to its root comment);
 - where the plan lives, and the repository's verify commands and CI workflow;
-- how to see the workers (cluster and namespace, or the harness's own status) and the deployed
-  application (URL, namespace, a test login);
+- how to see what the workers are doing (the dsh control plane's log or status: namespace and
+  deployment) and the deployed application (URL, namespace, a test login);
 - a scheduler in this harness (`CronCreate` in Claude Code). Without one, run step 3 by hand after every
   event and tell the owner that nothing checks while you are idle.
 
@@ -74,15 +74,22 @@ session: a new session sets it up again.
 
 Each tick reads, for every delegated issue that is not Done:
 
-- the issue status **and its session thread**. A hand-back and a question arrive as thread replies; the
-  PR alone does not show them.
 - the branch and PR: last commit time, mergeable state, CI on the head.
-- the workers, read-only; and for merges since the last tick, the rollout (step 6).
+- the worker's liveness from the dsh control plane, read-only (`docs/tick.md`). A working session shows
+  no thread activity and no commit until it hands back: silence during a review round is normal.
+- its session thread, when the PR changed, a hand-back is due or the control plane is silent. A hand-back
+  and a question arrive as thread replies; the PR alone does not show them.
+- for merges since the last tick, the rollout (step 6).
 
-A worker is stuck when it shows no thread activity, commit or PR update for 30 minutes, asks a question,
-or reports a blocker. Answer in its thread from the plan and the issue; if the answer is the owner's, ask
-the owner. Re-delegate only when the worker is gone **and** the thread is silent: say so in the thread,
-clear the delegate, set it again. A slow worker that still exists gets a question, not a second worker.
+The Linear credential may be shared and is rate-limited per hour: about one Linear read per open issue
+per tick, and never re-read a full description.
+
+A worker is stuck only when the control plane shows no activity for its ticket for 30 minutes **and**
+there is no new commit or thread reply, or when it asks a question or reports a blocker. Without access
+to the control plane, ask the owner before treating silence as a stall. Answer in its thread from the
+plan and the issue; if the answer is the owner's, ask the owner. Re-delegate only after a reminder in the
+thread was followed by continued silence in the log: say so in the thread, clear the delegate, set it
+again.
 
 ## 4. Review
 
