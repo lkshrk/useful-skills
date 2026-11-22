@@ -56,7 +56,8 @@ git push origin HEAD --tags
 
 Pushing a `vX.Y.Z` tag runs CI; on success CI dispatches `release.yml`, which
 creates the GitHub release and bumps the `useful-skills` entry in
-`lkshrk/agent-marketplace` (requires the `MARKETPLACE_PUSH_TOKEN` secret).
+`lkshrk/agent-marketplace` with a short-lived token from the
+`agent-marketplace-publish` octo-sts identity.
 Each release also attaches upload ZIPs for chat apps (`make skill-zips`).
 
 The weekly WoW season refresh (`.github/workflows/wow-season-updates.yml`) opens
