@@ -24,6 +24,7 @@ on:
 permissions:
   contents: write
   actions: read
+  id-token: write
 
 jobs:
   release:
@@ -130,29 +131,13 @@ jobs:
           \`\`\`
           EOF
 
-      - name: Verify marketplace update path
+      - name: Create agent-marketplace push token
         id: marketplace_check
-        env:
-          MARKETPLACE_PUSH_TOKEN: ${{ secrets.MARKETPLACE_PUSH_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -n "$MARKETPLACE_PUSH_TOKEN" ]; then
-            echo "MARKETPLACE_PUSH_TOKEN is configured"
-            exit 0
-          fi
-
-          codex_ref="$(curl -fsSL https://raw.githubusercontent.com/lkshrk/agent-marketplace/main/.agents/plugins/marketplace.json | jq -r '.plugins[] | select(.name == "useful-skills") | .source.ref')"
-          claude_ref="$(curl -fsSL https://raw.githubusercontent.com/lkshrk/agent-marketplace/main/.claude-plugin/marketplace.json | jq -r '.plugins[] | select(.name == "useful-skills") | .source.ref')"
-          claude_version="$(curl -fsSL https://raw.githubusercontent.com/lkshrk/agent-marketplace/main/.claude-plugin/marketplace.json | jq -r '.plugins[] | select(.name == "useful-skills") | .version')"
-          version="${TAG#v}"
-
-          if [ "$codex_ref" = "$TAG" ] && [ "$claude_ref" = "$TAG" ] && [ "$claude_version" = "$version" ]; then
-            echo "MARKETPLACE_PUSH_TOKEN is missing, but marketplace is already current for $TAG"
-            exit 0
-          fi
-
-          echo "MARKETPLACE_PUSH_TOKEN secret is required to update lkshrk/agent-marketplace" >&2
-          exit 1
+        uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        with:
+          domain: sts.h-cloud.io
+          scope: lkshrk
+          identity: agent-marketplace-publish
 
       - name: Create or update GitHub release
         id: publish
@@ -182,13 +167,9 @@ jobs:
       - name: Bump marketplace useful-skills version
         id: marketplace
         env:
-          MARKETPLACE_PUSH_TOKEN: ${{ secrets.MARKETPLACE_PUSH_TOKEN }}
+          MARKETPLACE_PUSH_TOKEN: ${{ steps.marketplace_check.outputs.token }}
         run: |
           set -euo pipefail
-          if [ -z "$MARKETPLACE_PUSH_TOKEN" ]; then
-            echo "MARKETPLACE_PUSH_TOKEN is missing; marketplace was verified current earlier"
-            exit 0
-          fi
           bun scripts/publish_marketplace.ts \
             --version "$TAG" \
             --marketplace-repo "https://x-access-token:${MARKETPLACE_PUSH_TOKEN}@github.com/lkshrk/agent-marketplace.git" \
@@ -200,7 +181,7 @@ jobs:
         env:
           RELEASE_SHA: ${{ steps.release_commit.outputs.sha }}
           STAGES: >-
-            {"Checkout":"${{ steps.checkout.outcome }}","Resolve commit":"${{ steps.release_commit.outcome }}","CI gate":"${{ steps.ci_gate.outcome }}","Bun setup":"${{ steps.bun.outcome }}","Node setup":"${{ steps.node.outcome }}","Dependency install":"${{ steps.install.outcome }}","Version validation":"${{ steps.version.outcome }}","Install smoke":"${{ steps.smoke.outcome }}","Release notes":"${{ steps.notes.outcome }}","Marketplace preflight":"${{ steps.marketplace_check.outcome }}","Publish release":"${{ steps.publish.outcome }}","Upload ZIPs":"${{ steps.assets.outcome }}","Marketplace update or already-current check":"${{ steps.marketplace.outcome }}"}
+            {"Checkout":"${{ steps.checkout.outcome }}","Resolve commit":"${{ steps.release_commit.outcome }}","CI gate":"${{ steps.ci_gate.outcome }}","Bun setup":"${{ steps.bun.outcome }}","Node setup":"${{ steps.node.outcome }}","Dependency install":"${{ steps.install.outcome }}","Version validation":"${{ steps.version.outcome }}","Install smoke":"${{ steps.smoke.outcome }}","Release notes":"${{ steps.notes.outcome }}","Marketplace preflight":"${{ steps.marketplace_check.outcome }}","Publish release":"${{ steps.publish.outcome }}","Upload ZIPs":"${{ steps.assets.outcome }}","Marketplace update":"${{ steps.marketplace.outcome }}"}
         with:
           script: |
             const stages = Object.entries(JSON.parse(process.env.STAGES));
